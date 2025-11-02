@@ -1,0 +1,52 @@
+{
+  "name": "@ssojet/authkit-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SSOJet AuthKit - Production-grade team management UI + webhook-driven SCIM provisioning",
+  "keywords": ["ssojet", "authkit", "team-management", "scim", "webhooks", "authentication"],
+  "homepage": "https://github.com/ssojet/ssojet-authkit#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ssojet/ssojet-authkit.git"
+  },
+  "license": "MIT",
+  "author": "SSOJet Team",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\"",
+    "test": "turbo run test",
+    "test:e2e": "playwright test",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm run build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "@playwright/test": "^1.42.1",
+    "@types/node": "^20.11.24",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "tsup": "^8.0.2",
+    "turbo": "^1.12.5",
+    "typescript": "^5.3.3",
+    "vitest": "^1.3.1"
+  },
+  "packageManager": "pnpm@8.15.4",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

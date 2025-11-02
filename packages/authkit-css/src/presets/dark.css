@@ -1,0 +1,41 @@
+/**
+ * Dark theme preset
+ */
+
+.ak-theme-dark {
+  /* Background colors */
+  --ak-bg: #0b0b0c;
+  --ak-bg-subtle: #18181b;
+  --ak-bg-muted: #27272a;
+  --ak-bg-hover: #27272a;
+  --ak-bg-active: #3f3f46;
+  
+  /* Foreground colors */
+  --ak-fg: #fafafa;
+  --ak-fg-subtle: #a1a1aa;
+  --ak-fg-muted: #71717a;
+  
+  /* Border colors */
+  --ak-border: #27272a;
+  --ak-border-hover: #3f3f46;
+  
+  /* Brand colors */
+  --ak-primary: #3b82f6;
+  --ak-primary-hover: #2563eb;
+  --ak-primary-fg: #ffffff;
+  
+  /* Status colors */
+  --ak-success: #22c55e;
+  --ak-success-fg: #ffffff;
+  --ak-warning: #f59e0b;
+  --ak-warning-fg: #ffffff;
+  --ak-danger: #ef4444;
+  --ak-danger-hover: #dc2626;
+  --ak-danger-fg: #ffffff;
+  --ak-info: #3b82f6;
+  --ak-info-fg: #ffffff;
+  
+  /* Focus ring */
+  --ak-ring: 0 0 0 var(--ak-ring-width) rgba(59, 130, 246, 0.5);
+  --ak-ring-danger: 0 0 0 var(--ak-ring-width) rgba(239, 68, 68, 0.5);
+}

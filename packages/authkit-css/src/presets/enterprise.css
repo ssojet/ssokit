@@ -1,0 +1,50 @@
+/**
+ * Enterprise theme preset - professional, polished look
+ */
+
+.ak-theme-enterprise {
+  /* Background colors */
+  --ak-bg: #ffffff;
+  --ak-bg-subtle: #f8fafc;
+  --ak-bg-muted: #f1f5f9;
+  --ak-bg-hover: #e2e8f0;
+  --ak-bg-active: #cbd5e1;
+  
+  /* Foreground colors */
+  --ak-fg: #0f172a;
+  --ak-fg-subtle: #475569;
+  --ak-fg-muted: #94a3b8;
+  
+  /* Border colors */
+  --ak-border: #e2e8f0;
+  --ak-border-hover: #cbd5e1;
+  
+  /* Brand colors */
+  --ak-primary: #0f172a;
+  --ak-primary-hover: #1e293b;
+  --ak-primary-fg: #ffffff;
+  
+  /* Status colors */
+  --ak-success: #059669;
+  --ak-success-fg: #ffffff;
+  --ak-warning: #d97706;
+  --ak-warning-fg: #ffffff;
+  --ak-danger: #dc2626;
+  --ak-danger-hover: #b91c1c;
+  --ak-danger-fg: #ffffff;
+  --ak-info: #0284c7;
+  --ak-info-fg: #ffffff;
+  
+  /* Enterprise styling adjustments */
+  --ak-radius: 6px;
+  --ak-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --ak-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --ak-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  
+  /* Focus ring */
+  --ak-ring: 0 0 0 var(--ak-ring-width) rgba(15, 23, 42, 0.25);
+  --ak-ring-danger: 0 0 0 var(--ak-ring-width) rgba(220, 38, 38, 0.35);
+  
+  /* Typography */
+  --ak-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}

@@ -79,9 +79,9 @@ export function TeamManager({
       setError(null);
       
       const [membersRes, invitesRes, rolesRes] = await Promise.all([
-        fetch(`${baseUrl}/orgs/${organizationId}/members`).then(r => r.json()),
-        fetch(`${baseUrl}/orgs/${organizationId}/invites`).then(r => r.json()),
-        fetch(`${baseUrl}/orgs/${organizationId}/roles`).then(r => r.json()),
+        fetch(`${baseUrl}/orgs123/${organizationId}/members`).then(r => r.json()),
+        fetch(`${baseUrl}/orgs123/${organizationId}/invites`).then(r => r.json()),
+        fetch(`${baseUrl}/orgs123/${organizationId}/roles`).then(r => r.json()),
       ]);
       
       setMembers(membersRes.data || []);

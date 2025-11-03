@@ -180,6 +180,7 @@ export function createRouteHandlers() {
     // GET /api/authkit/orgs/[orgId]/roles
     async listRoles(_req: NextRequest, _params: { params: { orgId: string } }) {
       try {
+       
         const data = await client.listRoles();
         return NextResponse.json(data);
       } catch (err: any) {

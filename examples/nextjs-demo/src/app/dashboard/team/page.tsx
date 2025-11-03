@@ -151,6 +151,7 @@ export default function TeamPage() {
             <TeamManager
               organizationId={organizationId}
               currentUserId={currentUserId}
+              apiBase='https://api.ssojet.com'
               showAuditLog={hasAdminRole}
               onMemberRemoved={(memberId) => {
                 console.log('Member removed:', memberId);

@@ -1,17 +1,5 @@
-import type { Member, RoleDefinition } from '@ssojet/ssokit-core';
+import type { MembersTableProps } from '../types';
 import { RoleSelector } from './RoleSelector';
-
-export interface MembersTableProps {
-  members: Member[];
-  roles: RoleDefinition[];
-  currentUserId?: string;
-  onUpdateRole?: (memberId: string, role: string) => Promise<void>;
-  onRemoveMember?: (memberId: string) => Promise<void>;
-  onResendInvite?: (inviteId: string) => Promise<void>;
-  isLoading?: boolean;
-  emptyMessage?: string;
-  className?: string;
-}
 
 /**
  * MembersTable - Displays team members with role management
@@ -29,15 +17,15 @@ export function MembersTable({
 }: MembersTableProps) {
   if (members.length === 0 && !isLoading) {
     return (
-      <div className={`ak-members-table__empty ${className}`}>
+      <div className={`sk-members-table__empty ${className}`}>
         <p>{emptyMessage}</p>
       </div>
     );
   }
 
   return (
-    <div className={`ak-members-table ${className}`}>
-      <table className="ak-table" role="table">
+    <div className={`sk-members-table ${className}`}>
+      <table className="sk-table" role="table">
         <thead>
           <tr>
             <th scope="col">Member</th>
@@ -45,13 +33,13 @@ export function MembersTable({
             <th scope="col">Role</th>
             <th scope="col">Status</th>
             <th scope="col">Joined</th>
-            <th scope="col" className="ak-table__actions">
+            <th scope="col" className="sk-table__actions">
               Actions
             </th>
           </tr>
         </thead>
         <tbody>
-          {members.map((member) => {
+          {Array.isArray(members) && members.length > 0 ? members.map((member) => {
             const isCurrentUser = member.userId === currentUserId;
             // Note: Members don't have a status field - they're all active
             // For pending invites, use a separate InvitesTable component
@@ -59,14 +47,14 @@ export function MembersTable({
             return (
               <tr key={member.id}>
                 <td>
-                  <div className="ak-member-cell">
-                    <div className="ak-member-cell__avatar">
+                  <div className="sk-member-cell">
+                    <div className="sk-member-cell__avatar">
                       {(member.name?.[0] ?? member.email[0] ?? '?').toUpperCase()}
                     </div>
-                    <span className="ak-member-cell__name">
+                    <span className="sk-member-cell__name">
                       {member.name || 'Unknown'}
                       {isCurrentUser && (
-                        <span className="ak-badge ak-badge--primary">You</span>
+                        <span className="sk-badge sk-badge--primary">You</span>
                       )}
                     </span>
                   </div>
@@ -81,11 +69,11 @@ export function MembersTable({
                       disabled={isLoading}
                     />
                   ) : (
-                    <span className="ak-badge">{member.role}</span>
+                    <span className="sk-badge">{member.role}</span>
                   )}
                 </td>
                 <td>
-                  <span className="ak-status-badge ak-status-badge--success">
+                  <span className="sk-status-badge sk-status-badge--success">
                     Active
                   </span>
                 </td>
@@ -94,12 +82,12 @@ export function MembersTable({
                     {new Date(member.joinedAt).toLocaleDateString()}
                   </time>
                 </td>
-                <td className="ak-table__actions">
+                <td className="sk-table__actions">
                   {onResendInvite ? (
                     <button
                       type="button"
                       onClick={() => onResendInvite(member.id)}
-                      className="ak-button ak-button--sm ak-button--secondary"
+                      className="sk-button sk-button--sm sk-button--secondary"
                       aria-label={`Resend invite to ${member.email}`}
                       disabled={isLoading}
                     >
@@ -118,7 +106,7 @@ export function MembersTable({
                           onRemoveMember(member.id);
                         }
                       }}
-                      className="ak-button ak-button--sm ak-button--danger"
+                      className="sk-button sk-button--sm sk-button--danger"
                       aria-label={`Remove ${member.name || member.email}`}
                       disabled={isLoading}
                     >
@@ -128,7 +116,13 @@ export function MembersTable({
                 </td>
               </tr>
             );
-          })}
+          }) : (
+            <tr>
+              <td colSpan={5} className="sk-table__empty">
+                {emptyMessage || 'No members found'}
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

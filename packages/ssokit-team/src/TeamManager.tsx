@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { SSOJetClient } from '@ssojet/ssokit-next';
+import type { RoleDefinition } from '@ssojet/ssokit-core';
+import type { UIMember } from './types';
 import { MembersTable } from './components/MembersTable';
 import { InviteDialog } from './components/InviteDialog';
 import { AuditLogViewer } from './components/AuditLogViewer';
@@ -33,6 +35,8 @@ export interface TeamManagerProps {
   client: SSOJetClient;
   /** Current user ID (for permissions) */
   currentUserId?: string;
+  /** Current user email (for invitations) */
+  currentUserEmail?: string;
   /** Show audit log tab */
   showAuditLog?: boolean;
   /** Custom slots for UI customization */
@@ -54,6 +58,7 @@ export function TeamManager({
   organizationId,
   client,
   currentUserId,
+  currentUserEmail,
   showAuditLog = false,
   slots = {},
   className = '',
@@ -64,11 +69,30 @@ export function TeamManager({
   // State
   const [activeTab, setActiveTab] = useState<TabType>('members');
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
-  const [members, setMembers] = useState<any[]>([]);
+  const [members, setMembers] = useState<UIMember[]>([]);
   const [invites, setInvites] = useState<any[]>([]);
-  const [roles, setRoles] = useState<any[]>([]);
+  const [roles, setRoles] = useState<RoleDefinition[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  // Helper function to transform API user data to component format
+  const transformUserToMember = useCallback((user: any, targetTenantId: string): UIMember => {
+    const targetTenant = user.tenants?.find((t: any) => t.tenant_id === targetTenantId);
+    const primaryRole = targetTenant?.roles?.[0];
+    
+    return {
+      id: user.id,
+      userId: user.id,
+      organizationId: targetTenantId,
+      email: user.email,
+      name: user.first_name || user.email.split('@')[0],
+      role: primaryRole?.role_name || 'Member',
+      joinedAt: user.created_at,
+      updatedAt: user.modified_at,
+      isActive: user.is_active,
+      lastLoginAt: user.last_login_at,
+    };
+  }, []);
 
   // Fetch data
   const fetchData = useCallback(async () => {
@@ -82,15 +106,28 @@ export function TeamManager({
         client.listRoles(),
       ]);
       
-      setMembers((membersRes as any)?.data || membersRes || []);
-      setInvites((invitesRes as any)?.data || invitesRes || []);
-      setRoles((rolesRes as any)?.data || rolesRes || []);
+      console.log('API Responses:', { membersRes, invitesRes, rolesRes });
+      
+      // Handle users API response format: { users: [...] }
+      const rawUsers = (membersRes as any)?.users || (membersRes as any)?.data || membersRes || [];
+      const invites = (invitesRes as any)?.data || invitesRes || [];
+      // Handle roles API response format: { roles: [...] }
+      const roles = (rolesRes as any)?.roles || (rolesRes as any)?.data || rolesRes || [];
+      
+      // Transform users to members format
+      const members = Array.isArray(rawUsers) ? rawUsers.map((user: any) => transformUserToMember(user, organizationId)) : [];
+      
+      console.log('Processed data:', { members, invites, roles });
+      
+      setMembers(members);
+      setInvites(Array.isArray(invites) ? invites : []);
+      setRoles(Array.isArray(roles) ? roles : []);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to load data'));
     } finally {
       setLoading(false);
     }
-  }, [client, organizationId]);
+  }, [client, organizationId, transformUserToMember]);
 
   useEffect(() => {
     fetchData();
@@ -98,15 +135,22 @@ export function TeamManager({
 
   // Actions
   const handleUpdateRole = useCallback(
-    async (memberId: string, role: string) => {
+    async (memberId: string, roleName: string) => {
       try {
-        await client.updateMember(organizationId, memberId, { role });
+        // Find the role ID from the role name
+        const role = roles.find(r => r.name === roleName);
+        if (!role) {
+          throw new Error(`Role "${roleName}" not found`);
+        }
+
+        // Update member roles using the new API
+        await client.updateMemberRoles(organizationId, memberId, [role.id]);
         await fetchData();
       } catch (err) {
         throw new Error(`Failed to update role: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     },
-    [client, organizationId, fetchData]
+    [client, organizationId, fetchData, roles]
   );
 
   const handleRemoveMember = useCallback(
@@ -123,9 +167,20 @@ export function TeamManager({
   );
 
   const handleInvite = useCallback(
-    async (email: string, role: string) => {
+    async (email: string, roleName: string) => {
       try {
-        const invite = await client.createInvite(organizationId, { email, role });
+        // Find the role ID by role name
+        const selectedRole = roles.find(r => r.name === roleName);
+        if (!selectedRole) {
+          throw new Error(`Role "${roleName}" not found`);
+        }
+
+        const invite = await client.createInvite(organizationId, {
+          invitee: { email },
+          role_ids: [selectedRole.id],
+          inviter: { email: currentUserEmail || 'system@example.com' },
+          send_invitation_email: true
+        });
         await fetchData();
         setIsInviteDialogOpen(false);
         onInviteSent?.(invite);
@@ -133,7 +188,7 @@ export function TeamManager({
         throw new Error(`Failed to send invite: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     },
-    [client, organizationId, fetchData, onInviteSent]
+    [client, organizationId, fetchData, onInviteSent, roles, currentUserEmail]
   );
 
   const handleResendInvite = useCallback(
@@ -151,11 +206,11 @@ export function TeamManager({
   // Loading state
   if (loading) {
     return (
-      <div className={`ak-team-manager ${className}`} data-loading="true">
+      <div className={`sk-team-manager ${className}`} data-loading="true">
         {slots.loading || (
-          <div className="ak-team-manager__loading">
-            <div className="ak-spinner" role="status" aria-label="Loading team data">
-              <span className="ak-sr-only">Loading...</span>
+          <div className="sk-team-manager__loading">
+            <div className="sk-spinner" role="status" aria-label="Loading team data">
+              <span className="sk-sr-only">Loading...</span>
             </div>
           </div>
         )}
@@ -166,10 +221,10 @@ export function TeamManager({
   // Error state
   if (error) {
     return (
-      <div className={`ak-team-manager ${className}`} data-error="true">
-        {slots.error?.(error) || (
-          <div className="ak-team-manager__error" role="alert">
-            <p>Failed to load team members: {error.message}</p>
+      <div className={`sk-team-manager ${className}`} data-error="true">
+        {slots.error ? slots.error(error) : (
+          <div className="sk-team-manager__error" role="alert">
+            {error.message}
           </div>
         )}
       </div>
@@ -177,15 +232,15 @@ export function TeamManager({
   }
 
   return (
-    <div className={`ak-team-manager ${className}`}>
+    <div className={`sk-team-manager ${className}`}>
       {/* Header */}
       {slots.header || (
-        <div className="ak-team-manager__header">
-          <h2 className="ak-team-manager__title">Team Management</h2>
+        <div className="sk-team-manager__header">
+          <h2 className="sk-team-manager__title">Team Management</h2>
           <button
             type="button"
             onClick={() => setIsInviteDialogOpen(true)}
-            className="ak-button ak-button--primary"
+            className="sk-button sk-button--primary"
             aria-label="Invite new member"
           >
             Invite Member
@@ -194,13 +249,13 @@ export function TeamManager({
       )}
 
       {/* Tabs */}
-      <div className="ak-team-manager__tabs" role="tablist">
+      <div className="sk-team-manager__tabs" role="tablist">
         <button
           role="tab"
           aria-selected={activeTab === 'members'}
           aria-controls="members-panel"
           onClick={() => setActiveTab('members')}
-          className={`ak-tab ${activeTab === 'members' ? 'ak-tab--active' : ''}`}
+          className={`sk-tab ${activeTab === 'members' ? 'sk-tab--active' : ''}`}
         >
           Members ({members.length})
         </button>
@@ -209,7 +264,7 @@ export function TeamManager({
           aria-selected={activeTab === 'invites'}
           aria-controls="invites-panel"
           onClick={() => setActiveTab('invites')}
-          className={`ak-tab ${activeTab === 'invites' ? 'ak-tab--active' : ''}`}
+          className={`sk-tab ${activeTab === 'invites' ? 'sk-tab--active' : ''}`}
         >
           Pending Invites ({invites.length})
         </button>
@@ -219,7 +274,7 @@ export function TeamManager({
             aria-selected={activeTab === 'audit'}
             aria-controls="audit-panel"
             onClick={() => setActiveTab('audit')}
-            className={`ak-tab ${activeTab === 'audit' ? 'ak-tab--active' : ''}`}
+            className={`sk-tab ${activeTab === 'audit' ? 'sk-tab--active' : ''}`}
           >
             Audit Log
           </button>
@@ -227,13 +282,13 @@ export function TeamManager({
       </div>
 
       {/* Tab Panels */}
-      <div className="ak-team-manager__content">
+      <div className="sk-team-manager__content">
         {activeTab === 'members' && (
           <div
             id="members-panel"
             role="tabpanel"
             aria-labelledby="members-tab"
-            className="ak-team-manager__panel"
+            className="sk-team-manager__panel"
           >
             <MembersTable
               members={members}
@@ -255,7 +310,7 @@ export function TeamManager({
             id="invites-panel"
             role="tabpanel"
             aria-labelledby="invites-tab"
-            className="ak-team-manager__panel"
+            className="sk-team-manager__panel"
           >
             <MembersTable
               members={
@@ -285,7 +340,7 @@ export function TeamManager({
             id="audit-panel"
             role="tabpanel"
             aria-labelledby="audit-tab"
-            className="ak-team-manager__panel"
+            className="sk-team-manager__panel"
           >
             <AuditLogViewer
               events={[]}

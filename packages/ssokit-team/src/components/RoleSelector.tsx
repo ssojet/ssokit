@@ -23,7 +23,7 @@ export function RoleSelector({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
-      className={`ak-role-selector ${className}`}
+      className={`sk-role-selector ${className}`}
       aria-label="Select role"
     >
       {roles.map((role) => (

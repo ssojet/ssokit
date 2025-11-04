@@ -1,14 +1,29 @@
 import type {
-  Member,
   RoleDefinition,
   AuditEvent,
 } from '@ssojet/ssokit-core';
 
 /**
+ * UI-specific member interface for component display
+ */
+export interface UIMember {
+  id: string;
+  email: string;
+  name?: string;
+  role: string;
+  joinedAt: string;
+  updatedAt?: string;
+  isActive?: boolean;
+  lastLoginAt?: string;
+  userId?: string;
+  organizationId?: string;
+}
+
+/**
  * Props for MembersTable component
  */
 export interface MembersTableProps {
-  members: Member[];
+  members: UIMember[];
   roles: RoleDefinition[];
   currentUserId?: string;
   onUpdateRole?: (memberId: string, role: string) => Promise<void>;

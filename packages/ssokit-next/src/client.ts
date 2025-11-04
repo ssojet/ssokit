@@ -100,10 +100,13 @@ class SSOJetLogger {
 export class SSOJetClient {
   private baseUrl: string;
   private accessToken?: string;
+  private clientId?: string;
 
-  constructor(accessToken?: string, options?: { baseUrl?: string }) {
+  constructor(accessToken?: string, options?: { baseUrl?: string; clientId?: string }) {
     // For client-side usage, baseUrl can be passed via options or NEXT_PUBLIC env var
     // For server-side usage, it reads from server config
+    let serverConfig: ReturnType<typeof readSSOJetServerConfig> | null = null;
+    
     if (options?.baseUrl) {
       this.baseUrl = options.baseUrl;
     } else if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SSOJET_BASE) {
@@ -111,14 +114,35 @@ export class SSOJetClient {
       this.baseUrl = process.env.NEXT_PUBLIC_SSOJET_BASE;
     } else {
       // Server-side: use server config
-      const config = readSSOJetServerConfig();
-      this.baseUrl = config.baseUrl;
+      serverConfig = readSSOJetServerConfig();
+      this.baseUrl = serverConfig.baseUrl;
     }
+    
+    // Set client ID from options or environment variables
+    if (options?.clientId) {
+      this.clientId = options.clientId;
+    } else if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SSOJET_CLIENT_ID) {
+      // Client-side: use public env var
+      this.clientId = process.env.NEXT_PUBLIC_SSOJET_CLIENT_ID;
+    } else if (serverConfig?.clientId) {
+      // Server-side: use from server config
+      this.clientId = serverConfig.clientId;
+    } else if (process.env.SSOJET_CLIENT_ID) {
+      // Fallback: direct env var
+      this.clientId = process.env.SSOJET_CLIENT_ID;
+    }
+    
     this.accessToken = accessToken;
   }
 
   async request<T>(path: string, init?: RequestInit): Promise<T> {
-    const url = `${this.baseUrl}${path}`;
+    // Build URL with client_id query parameter
+    const url = new URL(`${this.baseUrl}${path}`);
+    if (this.clientId) {
+      url.searchParams.set('client_id', this.clientId);
+    }
+    
+    const finalUrl = url.toString();
     const isDebugEnabled = process.env.SSOJET_DEBUG === 'true' || process.env.NODE_ENV === 'development';
 
     const requestOptions = {
@@ -135,14 +159,14 @@ export class SSOJetClient {
     if (isDebugEnabled) {
       requestId = SSOJetLogger.requestStart(
         init?.method || 'GET', 
-        url, 
+        finalUrl, 
         requestOptions.headers,
         init?.body
       );
     }
 
     try {
-      const response = await fetch(url, requestOptions);
+      const response = await fetch(finalUrl, requestOptions);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: response.statusText }));
@@ -179,11 +203,11 @@ export class SSOJetClient {
 
   // Organizations
   async getOrganization(orgId: string) {
-    return this.request(`/api/v1/tenants/${orgId}`);
+    return this.request(`/api/v1/auth/tenants/${orgId}`);
   }
 
   async updateOrganization(orgId: string, data: any) {
-    return this.request(`/api/v1/tenants/${orgId}`, {
+    return this.request(`/api/v1/auth/tenants/${orgId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
@@ -193,7 +217,7 @@ export class SSOJetClient {
   async listMembers(orgId: string, params?: Record<string, string>) {
     console.log("=== ssojet");
     const query = params ? `?${new URLSearchParams(params).toString()}` : '';
-    return this.request(`/api/v1/tenants/${orgId}/users${query}`);
+    return this.request(`/api/v1/auth/tenants/${orgId}/users${query}`);
   }
 
   async addMember(orgId: string, data: any) {
@@ -245,17 +269,31 @@ export class SSOJetClient {
   // Audit
   async listAuditEvents(orgId: string, cursor?: string) {
     const query = cursor ? `?cursor=${cursor}` : '';
-    return this.request(`/api/v1/tenants/${orgId}/audit${query}`);
+    return this.request(`/api/v1/auth/tenants/${orgId}/audit${query}`);
   }
 
   // Roles
   async listRoles() {
     console.log('==== Listing roles from SSOJetClient');
-    return this.request(`/api/v1/roles`);
+    return this.request(`/api/v1/auth/roles`);
+  }
+
+  // Update member roles
+  async updateMemberRoles(tenantId: string, userId: string, roleIds: string[]) {
+    console.log('==== Updating member roles from SSOJetClient', { tenantId, userId, roleIds });
+    return this.request(`/api/v1/auth/tenants/${tenantId}/users/${userId}/roles`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        role_ids: roleIds
+      })
+    });
   }
 
   // User organizations
   async listUserOrganizations(userId: string) {
-    return this.request(`/api/v1/users/${userId}/tenants`);
+    return this.request(`/api/v1/auth/users/${userId}/tenants`);
   }
 }

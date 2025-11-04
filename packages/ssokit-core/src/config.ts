@@ -6,6 +6,7 @@ import { ConfigError } from './errors.js';
 export interface SSOJetServerConfig {
   baseUrl: string;
   apiKey: string;
+  clientId?: string;
 }
 
 /**
@@ -38,6 +39,7 @@ export interface AuthKitPublicConfig {
 export function readSSOJetServerConfig(): SSOJetServerConfig {
   const baseUrl = process.env.SSOJET_BASE;
   const apiKey = process.env.SSOJET_API_KEY;
+  const clientId = process.env.SSOJET_CLIENT_ID;
 
   if (!baseUrl) {
     throw new ConfigError(
@@ -53,7 +55,7 @@ export function readSSOJetServerConfig(): SSOJetServerConfig {
     );
   }
 
-  return { baseUrl, apiKey };
+  return { baseUrl, apiKey, clientId };
 }
 
 /**

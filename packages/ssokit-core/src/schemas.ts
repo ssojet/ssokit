@@ -30,24 +30,47 @@ export type OrganizationUpdate = z.infer<typeof OrganizationUpdateSchema>;
 export const MemberRoleSchema = z.enum(['owner', 'admin', 'member', 'guest']);
 export type MemberRole = z.infer<typeof MemberRoleSchema>;
 
+// Updated Member schema to match actual API response from /users endpoint
+export const MemberTenantRoleSchema = z.object({
+  role_id: z.string(),
+  role_name: z.string(),
+  permissions: z.null().or(z.array(z.string())),
+});
+
+export const MemberTenantSchema = z.object({
+  tenant_id: z.string(),
+  tenant_name: z.string(),
+  roles: z.array(MemberTenantRoleSchema),
+  status: z.string(),
+});
+
+export const MemberIdentitySchema = z.object({
+  id: z.string(),
+  provider: z.string(),
+  first_name: z.string().optional(),
+  created_at: z.string(),
+  modified_at: z.string(),
+});
+
 export const MemberSchema = z.object({
   id: z.string(),
-  userId: z.string(),
-  organizationId: z.string(),
-  role: MemberRoleSchema,
   email: z.string().email(),
-  name: z.string().optional(),
-  avatarUrl: z.string().url().optional(),
-  joinedAt: z.string(),
-  updatedAt: z.string(),
+  first_name: z.string().optional(),
+  tenants: z.array(MemberTenantSchema),
+  identities: z.array(MemberIdentitySchema),
+  source: z.string(),
+  created_at: z.string(),
+  modified_at: z.string(),
+  is_active: z.boolean(),
+  last_login_at: z.string().optional(),
 });
 
 export type Member = z.infer<typeof MemberSchema>;
 
 export const MemberListResponseSchema = z.object({
-  data: z.array(MemberSchema),
-  cursor: z.string().optional(),
-  hasMore: z.boolean(),
+  limit: z.number(),
+  next_cursor: z.string(),
+  users: z.array(MemberSchema),
 });
 
 export type MemberListResponse = z.infer<typeof MemberListResponseSchema>;
@@ -134,9 +157,11 @@ export type AuditListResponse = z.infer<typeof AuditListResponseSchema>;
 // ============================================================================
 
 export const RoleDefinitionSchema = z.object({
-  name: MemberRoleSchema,
+  id: z.string(),
+  name: z.string(), // Changed from MemberRoleSchema to allow any role name
   description: z.string(),
-  permissions: z.array(z.string()),
+  permission_ids: z.array(z.string()), // Changed from permissions to permission_ids
+  is_active: z.boolean(),
 });
 
 export type RoleDefinition = z.infer<typeof RoleDefinitionSchema>;

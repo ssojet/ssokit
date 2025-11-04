@@ -22,11 +22,18 @@ export function InviteDialog({
   isLoading = false,
 }: InviteDialogProps) {
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('member');
+  const [role, setRole] = useState('Member');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
+
+  // Set default role when roles are available
+  useEffect(() => {
+    if (roles && roles.length > 0 && !roles.find(r => r.name === role) && roles[0]) {
+      setRole(roles[0].name);
+    }
+  }, [roles, role]);
 
   // Focus management
   useEffect(() => {
@@ -79,7 +86,7 @@ export function InviteDialog({
 
   return (
     <div
-      className="ak-dialog-overlay"
+      className="sk-dialog-overlay"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -87,15 +94,15 @@ export function InviteDialog({
       aria-modal="true"
       aria-labelledby="invite-dialog-title"
     >
-      <div ref={dialogRef} className="ak-dialog">
-        <div className="ak-dialog__header">
-          <h2 id="invite-dialog-title" className="ak-dialog__title">
+      <div ref={dialogRef} className="sk-dialog">
+        <div className="sk-dialog__header">
+          <h2 id="invite-dialog-title" className="sk-dialog__title">
             Invite Team Member
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="ak-dialog__close"
+            className="sk-dialog__close"
             aria-label="Close dialog"
             disabled={submitting}
           >
@@ -103,9 +110,9 @@ export function InviteDialog({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="ak-dialog__content">
-          <div className="ak-form-field">
-            <label htmlFor="invite-email" className="ak-label">
+        <form onSubmit={handleSubmit} className="sk-dialog__content">
+          <div className="sk-form-field">
+            <label htmlFor="invite-email" className="sk-label">
               Email address
             </label>
             <input
@@ -114,7 +121,7 @@ export function InviteDialog({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="ak-input"
+              className="sk-input"
               placeholder="colleague@example.com"
               required
               disabled={submitting || isLoading}
@@ -124,15 +131,15 @@ export function InviteDialog({
             />
           </div>
 
-          <div className="ak-form-field">
-            <label htmlFor="invite-role" className="ak-label">
+          <div className="sk-form-field">
+            <label htmlFor="invite-role" className="sk-label">
               Role
             </label>
             <select
               id="invite-role"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="ak-select"
+              className="sk-select"
               disabled={submitting || isLoading}
             >
               {roles.map((r) => (
@@ -141,29 +148,29 @@ export function InviteDialog({
                 </option>
               ))}
             </select>
-            <p className="ak-help-text">
+            <p className="sk-help-text">
               {roles.find((r) => r.name === role)?.description}
             </p>
           </div>
 
           {error && (
-            <div id="invite-error" className="ak-error" role="alert">
+            <div id="invite-error" className="sk-error" role="alert">
               {error}
             </div>
           )}
 
-          <div className="ak-dialog__footer">
+          <div className="sk-dialog__footer">
             <button
               type="button"
               onClick={onClose}
-              className="ak-button ak-button--secondary"
+              className="sk-button sk-button--secondary"
               disabled={submitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="ak-button ak-button--primary"
+              className="sk-button sk-button--primary"
               disabled={submitting || isLoading || !email}
             >
               {submitting ? 'Sending...' : 'Send Invite'}

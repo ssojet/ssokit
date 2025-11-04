@@ -82,6 +82,7 @@ export default function TeamPage() {
   const primaryOrg = userOrganizations[0];
   const organizationId = primaryOrg.id;
   const currentUserId = session.user.id;
+  const currentUserEmail = session.user.email || 'unknown@example.com';
   const hasAdminRole = primaryOrg.roles.some(role => 
     ['admin', 'owner', 'Admin', 'Owner'].includes(role)
   );
@@ -175,6 +176,7 @@ export default function TeamPage() {
               organizationId={organizationId}
               client={ssojetClient}
               currentUserId={currentUserId}
+              currentUserEmail={currentUserEmail}
               showAuditLog={hasAdminRole}
               onMemberRemoved={(memberId: string) => {
                 console.log('Member removed:', memberId);

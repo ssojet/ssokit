@@ -22,7 +22,7 @@ export function AuditLogViewer({
 }: AuditLogViewerProps) {
   if (events.length === 0 && !isLoading) {
     return (
-      <div className={`ak-audit-log__empty ${className}`}>
+      <div className={`sk-audit-log__empty ${className}`}>
         <p>{emptyMessage}</p>
       </div>
     );
@@ -58,19 +58,19 @@ export function AuditLogViewer({
   };
 
   return (
-    <div className={`ak-audit-log ${className}`}>
-      <div className="ak-audit-log__list" role="list">
+    <div className={`sk-audit-log ${className}`}>
+      <div className="sk-audit-log__list" role="list">
         {events.map((event) => (
-          <div key={event.id} className="ak-audit-log__item" role="listitem">
-            <div className="ak-audit-log__icon" aria-hidden="true">
+          <div key={event.id} className="sk-audit-log__item" role="listitem">
+            <div className="sk-audit-log__icon" aria-hidden="true">
               {getEventIcon(event.eventType)}
             </div>
-            <div className="ak-audit-log__content">
-              <p className="ak-audit-log__description">
+            <div className="sk-audit-log__content">
+              <p className="sk-audit-log__description">
                 {formatEventDescription(event)}
               </p>
               <time
-                className="ak-audit-log__time"
+                className="sk-audit-log__time"
                 dateTime={event.createdAt}
                 title={new Date(event.createdAt).toLocaleString()}
               >
@@ -82,11 +82,11 @@ export function AuditLogViewer({
       </div>
 
       {hasMore && onLoadMore && (
-        <div className="ak-audit-log__footer">
+        <div className="sk-audit-log__footer">
           <button
             type="button"
             onClick={onLoadMore}
-            className="ak-button ak-button--secondary"
+            className="sk-button sk-button--secondary"
             disabled={isLoading}
           >
             {isLoading ? 'Loading...' : 'Load More'}

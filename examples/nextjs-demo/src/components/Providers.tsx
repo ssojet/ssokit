@@ -1,6 +1,6 @@
 'use client';
 
-import { AuthKitProvider } from '@ssojet/authkit-react';
+import { AuthKitProvider } from '@ssojet/ssokit-react';
 import AuthProvider from './AuthProvider';
 import { ReactNode } from 'react';
 

@@ -1,0 +1,41 @@
+/**
+ * Light theme preset
+ */
+
+.sk-theme-light {
+  /* Background colors */
+  --sk-bg: #ffffff;
+  --sk-bg-subtle: #f9fafb;
+  --sk-bg-muted: #f3f4f6;
+  --sk-bg-hover: #f3f4f6;
+  --sk-bg-active: #e5e7eb;
+  
+  /* Foreground colors */
+  --sk-fg: #111827;
+  --sk-fg-subtle: #6b7280;
+  --sk-fg-muted: #9ca3af;
+  
+  /* Border colors */
+  --sk-border: #e5e7eb;
+  --sk-border-hover: #d1d5db;
+  
+  /* Brand colors */
+  --sk-primary: #2563eb;
+  --sk-primary-hover: #1d4ed8;
+  --sk-primary-fg: #ffffff;
+  
+  /* Status colors */
+  --sk-success: #10b981;
+  --sk-success-fg: #ffffff;
+  --sk-warning: #f59e0b;
+  --sk-warning-fg: #ffffff;
+  --sk-danger: #ef4444;
+  --sk-danger-hover: #dc2626;
+  --sk-danger-fg: #ffffff;
+  --sk-info: #3b82f6;
+  --sk-info-fg: #ffffff;
+  
+  /* Focus ring */
+  --sk-ring: 0 0 0 var(--sk-ring-width) rgba(37, 99, 235, 0.35);
+  --sk-ring-danger: 0 0 0 var(--sk-ring-width) rgba(239, 68, 68, 0.35);
+}

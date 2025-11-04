@@ -1,0 +1,64 @@
+/**
+ * CSS token system for AuthKit widgets
+ * These CSS variables can be overridden via theme prop or CSS
+ */
+
+.sk-root {
+  /* Typography */
+  --sk-font-size: 14px;
+  --sk-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --sk-line-height: 1.5;
+  
+  /* Spacing */
+  --sk-spacing: 12px;
+  --sk-spacing-xs: 4px;
+  --sk-spacing-sm: 8px;
+  --sk-spacing-md: 16px;
+  --sk-spacing-lg: 24px;
+  --sk-spacing-xl: 32px;
+  
+  /* Border radius */
+  --sk-radius: 8px;
+  --sk-radius-sm: 4px;
+  --sk-radius-lg: 12px;
+  --sk-radius-full: 9999px;
+  
+  /* Shadows */
+  --sk-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --sk-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --sk-shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --sk-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  
+  /* Input dimensions */
+  --sk-input-h: 40px;
+  --sk-input-h-sm: 32px;
+  --sk-input-h-lg: 48px;
+  
+  /* Focus ring */
+  --sk-ring-width: 2px;
+  --sk-ring-offset: 2px;
+  
+  /* Transitions */
+  --sk-transition: all 150ms ease-in-out;
+  
+  /* Z-index */
+  --sk-z-dropdown: 1000;
+  --sk-z-modal: 1100;
+  --sk-z-popover: 1200;
+  --sk-z-tooltip: 1300;
+}
+
+/* Base reset for AuthKit components */
+.sk-root *,
+.sk-root *::before,
+.sk-root *::after {
+  box-sizing: border-box;
+}
+
+.sk-root {
+  font-family: var(--sk-font-family);
+  font-size: var(--sk-font-size);
+  line-height: var(--sk-line-height);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

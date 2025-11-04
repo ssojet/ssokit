@@ -1,0 +1,39 @@
+{
+    "name": "@ssojet/ssokit-css",
+  "version": "0.1.0",
+  "description": "CSS tokens, theme presets, and Tailwind configuration for SSOJet AuthKit",
+  "keywords": ["ssojet", "authkit", "css", "theme", "tailwind"],
+  "homepage": "https://github.com/ssojet/ssojet-authkit#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ssojet/ssojet-authkit.git",
+    "directory": "packages/authkit-css"
+  },
+  "license": "MIT",
+  "author": "SSOJet Team",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./tailwind/preset.cjs": "./tailwind/preset.cjs"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist", "tailwind", "README.md"],
+  "scripts": {
+    "build": "tsup && npm run build:css",
+    "build:css": "mkdir -p dist && cat src/tokens.css src/presets/*.css > dist/styles.css",
+    "dev": "npm run build:css && tsup --watch",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "tsup": "^8.0.2",
+    "typescript": "^5.3.3"
+  }
+}

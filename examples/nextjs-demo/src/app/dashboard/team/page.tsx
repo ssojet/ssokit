@@ -1,12 +1,20 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { TeamManager } from '@ssojet/authkit-team';
+import { TeamManager } from '@ssojet/ssokit-team';
+import { SSOJetClient } from '@ssojet/ssokit-next';
+import { useMemo } from 'react';
 import Navigation from '@/components/Navigation';
-import '@ssojet/authkit-team/styles.css';
+import '@ssojet/ssokit-team/styles.css';
 
 export default function TeamPage() {
   const { data: session, status } = useSession();
+
+  // Create SSOJet client instance with user's access token (must be at top level)
+  const ssojetClient = useMemo(() => 
+    session?.accessToken ? new SSOJetClient(session.accessToken) : null, 
+    [session?.accessToken]
+  );
 
   if (status === 'loading') {
     return (
@@ -77,6 +85,21 @@ export default function TeamPage() {
   const hasAdminRole = primaryOrg.roles.some(role => 
     ['admin', 'owner', 'Admin', 'Owner'].includes(role)
   );
+
+  // Guard: ssojetClient should exist at this point
+  if (!ssojetClient) {
+    return (
+      <div>
+        <Navigation />
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Configuration Error</h1>
+            <p className="text-gray-600 mb-6">Unable to initialize SSOJet client.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -150,13 +173,13 @@ export default function TeamPage() {
           <div className="bg-white shadow rounded-lg">
             <TeamManager
               organizationId={organizationId}
+              client={ssojetClient}
               currentUserId={currentUserId}
-              apiBase='https://api.ssojet.com'
               showAuditLog={hasAdminRole}
-              onMemberRemoved={(memberId) => {
+              onMemberRemoved={(memberId: string) => {
                 console.log('Member removed:', memberId);
               }}
-              onInviteSent={(invite) => {
+              onInviteSent={(invite: unknown) => {
                 console.log('Invite sent:', invite);
               }}
             />

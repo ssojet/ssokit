@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { SSOJetClient } from '@ssojet/ssokit-next';
 import type { RoleDefinition } from '@ssojet/ssokit-core';
 import type { UIMember } from './types';
@@ -47,6 +47,8 @@ export interface TeamManagerProps {
   onMemberRemoved?: (memberId: string) => void;
   /** Callback when invite is sent */
   onInviteSent?: (invite: any) => void;
+  /** Roles that can manage team (invite, remove, update). Defaults to ["Owner"] if not specified or from env var SSOKIT_TEAM_MANAGER_ROLES */
+  managerRoles?: string[];
 }
 
 type TabType = 'members' | 'invites' | 'audit';
@@ -64,7 +66,27 @@ export function TeamManager({
   className = '',
   onMemberRemoved,
   onInviteSent,
+  managerRoles,
 }: TeamManagerProps) {
+
+  // Determine allowed manager roles from props, env var, or default
+  const allowedManagerRoles = useMemo(() => {
+    if (managerRoles && managerRoles.length > 0) {
+      return managerRoles;
+    }
+    
+    // Check environment variable
+    const envRoles = typeof window !== 'undefined' 
+      ? process.env.NEXT_PUBLIC_SSOKIT_TEAM_MANAGER_ROLES
+      : process.env.SSOKIT_TEAM_MANAGER_ROLES;
+    
+    if (envRoles) {
+      return envRoles.split(',').map(role => role.trim());
+    }
+    
+    // Default to Owner only
+    return ['Owner'];
+  }, [managerRoles]);
 
   // State
   const [activeTab, setActiveTab] = useState<TabType>('members');
@@ -74,6 +96,19 @@ export function TeamManager({
   const [roles, setRoles] = useState<RoleDefinition[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  // Get current user's role in this organization
+  const currentUserRole = useMemo(() => {
+    if (!currentUserId) return null;
+    const currentMember = members.find(m => m.userId === currentUserId || m.id === currentUserId);
+    return currentMember?.role || null;
+  }, [currentUserId, members]);
+
+  // Check if current user has management permissions
+  const canManageTeam = useMemo(() => {
+    if (!currentUserRole) return false;
+    return allowedManagerRoles.includes(currentUserRole);
+  }, [currentUserRole, allowedManagerRoles]);
 
   // Helper function to transform API user data to component format
   const transformUserToMember = useCallback((user: any, targetTenantId: string): UIMember => {
@@ -156,7 +191,7 @@ export function TeamManager({
   const handleRemoveMember = useCallback(
     async (memberId: string) => {
       try {
-        await client.removeMember(organizationId, { memberId });
+        await client.removeMember(organizationId, memberId);
         await fetchData();
         onMemberRemoved?.(memberId);
       } catch (err) {
@@ -237,14 +272,16 @@ export function TeamManager({
       {slots.header || (
         <div className="sk-team-manager__header">
           <h2 className="sk-team-manager__title">Team Management</h2>
-          <button
-            type="button"
-            onClick={() => setIsInviteDialogOpen(true)}
-            className="sk-button sk-button--primary"
-            aria-label="Invite new member"
-          >
-            Invite Member
-          </button>
+          {canManageTeam && (
+            <button
+              type="button"
+              onClick={() => setIsInviteDialogOpen(true)}
+              className="sk-button sk-button--primary"
+              aria-label="Invite new member"
+            >
+              Invite Member
+            </button>
+          )}
         </div>
       )}
 
@@ -294,8 +331,8 @@ export function TeamManager({
               members={members}
               roles={roles}
               currentUserId={currentUserId}
-              onUpdateRole={handleUpdateRole}
-              onRemoveMember={handleRemoveMember}
+              onUpdateRole={canManageTeam ? handleUpdateRole : undefined}
+              onRemoveMember={canManageTeam ? handleRemoveMember : undefined}
               emptyMessage={
                 typeof slots.emptyMembers === 'string'
                   ? slots.emptyMembers
@@ -325,7 +362,7 @@ export function TeamManager({
                 }))
               }
               roles={roles}
-              onResendInvite={handleResendInvite}
+              onResendInvite={canManageTeam ? handleResendInvite : undefined}
               emptyMessage={
                 typeof slots.emptyInvites === 'string'
                   ? slots.emptyInvites
@@ -350,13 +387,15 @@ export function TeamManager({
         )}
       </div>
 
-      {/* Invite Dialog */}
-      <InviteDialog
-        isOpen={isInviteDialogOpen}
-        onClose={() => setIsInviteDialogOpen(false)}
-        onInvite={handleInvite}
-        roles={roles}
-      />
+      {/* Invite Dialog - Only show if user can manage team */}
+      {canManageTeam && (
+        <InviteDialog
+          isOpen={isInviteDialogOpen}
+          onClose={() => setIsInviteDialogOpen(false)}
+          onInvite={handleInvite}
+          roles={roles}
+        />
+      )}
     </div>
   );
 }

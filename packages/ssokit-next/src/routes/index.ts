@@ -91,9 +91,8 @@ export function createRouteHandlers() {
       { params }: { params: { orgId: string; memberId: string } }
     ) {
       try {
-        // Create data payload with memberId for the API
-        const data = { memberId: params.memberId };
-        const result = await client.removeMember(params.orgId, data);
+        // Remove member using the new API signature
+        const result = await client.removeMember(params.orgId, params.memberId);
         return NextResponse.json(result);
       } catch (err: any) {
         return NextResponse.json(

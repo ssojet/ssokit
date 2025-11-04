@@ -234,10 +234,16 @@ export class SSOJetClient {
     });
   }
 
-  async removeMember(orgId: string, data: any) {
-    return this.request(`/api/v1/auth/tenants/${orgId}/invitations`, {
+  async removeMember(tenantId: string, userId: string) {
+    console.log('==== Removing member from SSOJetClient', { tenantId, userId });
+    return this.request(`/api/v1/auth/tenants/${tenantId}/users`, {
       method: 'DELETE',
-       body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_ids: [userId]
+      })
     });
   }
 

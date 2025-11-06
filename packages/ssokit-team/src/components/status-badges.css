@@ -1,0 +1,30 @@
+/* Status Badges */
+.sk-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.sk-status-badge--active {
+  background-color: var(--sk-success-bg, #dcfce7);
+  color: var(--sk-success-fg, #166534);
+}
+
+.sk-status-badge--pending {
+  background-color: var(--sk-warning-bg, #fef9c3);
+  color: var(--sk-warning-fg, #854d0e);
+}
+
+.sk-status-badge--expired {
+  background-color: var(--sk-error-bg, #fee2e2);
+  color: var(--sk-error-fg, #991b1b);
+}
+
+.sk-status-badge--revoked {
+  background-color: var(--sk-neutral-bg, #f3f4f6);
+  color: var(--sk-neutral-fg, #374151);
+}

@@ -17,6 +17,7 @@ export interface UIMember {
   lastLoginAt?: string;
   userId?: string;
   organizationId?: string;
+  status?: 'active' | 'pending' | 'expired' | 'revoked';
 }
 
 /**

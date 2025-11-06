@@ -126,6 +126,7 @@ export function TeamManager({
       updatedAt: user.modified_at,
       isActive: user.is_active,
       lastLoginAt: user.last_login_at,
+      status: targetTenant?.status || 'active',
     };
   }, []);
 

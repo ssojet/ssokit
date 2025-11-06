@@ -31,8 +31,8 @@ export function MembersTable({
             <th scope="col">Member</th>
             <th scope="col">Email</th>
             <th scope="col">Role</th>
-            <th scope="col">Status</th>
             <th scope="col">Joined</th>
+          <th scope="col">Invite Date</th>
             <th scope="col" className="sk-table__actions">
               Actions
             </th>
@@ -41,8 +41,7 @@ export function MembersTable({
         <tbody>
           {Array.isArray(members) && members.length > 0 ? members.map((member) => {
             const isCurrentUser = member.userId === currentUserId;
-            // Note: Members don't have a status field - they're all active
-            // For pending invites, use a separate InvitesTable component
+            const status = member.status || 'active';
 
             return (
               <tr key={member.id}>
@@ -69,14 +68,15 @@ export function MembersTable({
                       disabled={isLoading}
                     />
                   ) : (
-                    <span className="sk-badge">{member.role}</span>
+                    <span>{member.role}</span>
                   )}
                 </td>
                 <td>
-                  <span className="sk-status-badge sk-status-badge--success">
-                    Active
+                  <span className={`sk-status-badge sk-status-badge--${status.toLowerCase()}`}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
                   </span>
                 </td>
+               
                 <td>
                   <time dateTime={member.joinedAt}>
                     {new Date(member.joinedAt).toLocaleDateString()}

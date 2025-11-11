@@ -2,12 +2,24 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { SSOJetClient } from '@ssojet/ssokit-next';
+import { ApiError } from '@ssojet/ssokit-core/errors';
 import type { RoleDefinition } from '@ssojet/ssokit-core';
 import type { UIMember } from './types';
 import { MembersTable } from './components/MembersTable';
 import { InviteDialog } from './components/InviteDialog';
 import { AuditLogViewer } from './components/AuditLogViewer';
 import '@ssojet/ssokit-css';
+
+/**
+ * Extract error message from API error response
+ */
+function getErrorMessage(err: unknown): string {
+  if (err instanceof ApiError && err.response) {
+    const response = err.response as { error_description?: string; message?: string };
+    return response.error_description || response.message || err.message;
+  }
+  return err instanceof Error ? err.message : 'Unknown error';
+}
 
 /**
  * Customizable slots for TeamManager component
@@ -92,10 +104,12 @@ export function TeamManager({
   const [activeTab, setActiveTab] = useState<TabType>('members');
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [members, setMembers] = useState<UIMember[]>([]);
-  const [invites, setInvites] = useState<any[]>([]);
+  const [invites, setInvites] = useState<UIMember[]>([]);
   const [roles, setRoles] = useState<RoleDefinition[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [actionLoading, setActionLoading] = useState<{ [key: string]: boolean }>({});
 
   // Get current user's role in this organization
   const currentUserRole = useMemo(() => {
@@ -136,30 +150,65 @@ export function TeamManager({
       setLoading(true);
       setError(null);
       
-      const [membersRes, invitesRes, rolesRes] = await Promise.all([
+      const [membersRes, invitationsRes, rolesRes] = await Promise.all([
         client.listMembers(organizationId),
-        client.listInvites(organizationId),
+        client.listInvites(organizationId, 'pending'),
         client.listRoles(),
       ]);
       
-      console.log('API Responses:', { membersRes, invitesRes, rolesRes });
+      console.log('API Responses:', { membersRes, invitationsRes, rolesRes });
       
       // Handle users API response format: { users: [...] }
       const rawUsers = (membersRes as any)?.users || (membersRes as any)?.data || membersRes || [];
-      const invites = (invitesRes as any)?.data || invitesRes || [];
       // Handle roles API response format: { roles: [...] }
       const roles = (rolesRes as any)?.roles || (rolesRes as any)?.data || rolesRes || [];
+      // Handle invitations API response format: { invitation: [...] }
+      const rawInvitations = (invitationsRes as any)?.invitation || [];
       
-      // Transform users to members format
-      const members = Array.isArray(rawUsers) ? rawUsers.map((user: any) => transformUserToMember(user, organizationId)) : [];
+      // Transform users to active members only
+      const allMembers: UIMember[] = [];
       
-      console.log('Processed data:', { members, invites, roles });
+      if (Array.isArray(rawUsers)) {
+        rawUsers.forEach((user: any) => {
+          const member = transformUserToMember(user, organizationId);
+          
+          // Only include active members
+          if (member.status === 'active' || !member.status) {
+            allMembers.push(member);
+          }
+        });
+      }
       
-      setMembers(members);
-      setInvites(Array.isArray(invites) ? invites : []);
+      // Transform invitations to pending invites
+      const pendingInvites: UIMember[] = [];
+      if (Array.isArray(rawInvitations)) {
+        rawInvitations.forEach((invitation: any) => {
+          const invite: UIMember = {
+            id: invitation.id,
+            email: invitation.email,
+            name: invitation.email.split('@')[0], // Use email prefix as name
+            role: invitation.roles?.[0]?.role_name || 'Member',
+            joinedAt: invitation.created_at,
+            updatedAt: invitation.modified_at,
+            status: invitation.status,
+            organizationId: organizationId,
+          };
+          pendingInvites.push(invite);
+        });
+      }
+      
+      console.log('Processed data:', { 
+        activeMembers: allMembers, 
+        pendingInvites, 
+        roles 
+      });
+      
+      setMembers(allMembers);
+      setInvites(pendingInvites);
       setRoles(Array.isArray(roles) ? roles : []);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to load data'));
+      const errorMessage = getErrorMessage(err);
+      setError(new Error(`Failed to load data: ${errorMessage}`));
     } finally {
       setLoading(false);
     }
@@ -183,7 +232,7 @@ export function TeamManager({
         await client.updateMemberRoles(organizationId, memberId, [role.id]);
         await fetchData();
       } catch (err) {
-        throw new Error(`Failed to update role: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        throw new Error(`Failed to update role: ${getErrorMessage(err)}`);
       }
     },
     [client, organizationId, fetchData, roles]
@@ -196,13 +245,13 @@ export function TeamManager({
         await fetchData();
         onMemberRemoved?.(memberId);
       } catch (err) {
-        throw new Error(`Failed to remove member: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        throw new Error(`Failed to remove member: ${getErrorMessage(err)}`);
       }
     },
     [client, organizationId, fetchData, onMemberRemoved]
   );
 
-  const handleInvite = useCallback(
+    const handleInviteMember = useCallback(
     async (email: string, roleName: string) => {
       try {
         // Find the role ID by role name
@@ -221,22 +270,78 @@ export function TeamManager({
         setIsInviteDialogOpen(false);
         onInviteSent?.(invite);
       } catch (err) {
-        throw new Error(`Failed to send invite: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        throw new Error(`Failed to send invite: ${getErrorMessage(err)}`);
       }
     },
     [client, organizationId, fetchData, onInviteSent, roles, currentUserEmail]
   );
 
   const handleResendInvite = useCallback(
-    async (inviteId: string) => {
+    async (userId: string) => {
+      const loadingKey = `resend-${userId}`;
       try {
-        await client.resendInvite(organizationId, inviteId);
+        setActionLoading(prev => ({ ...prev, [loadingKey]: true }));
+        setStatusMessage(null);
+        // Find the member/invite to get their email and role
+        const member = invites.find(inv => inv.id === userId || inv.userId === userId);
+        if (!member) {
+          throw new Error('Invite not found');
+        }
+
+        // Find the role ID by role name
+        const selectedRole = roles.find(r => r.name === member.role);
+        if (!selectedRole) {
+          throw new Error(`Role "${member.role}" not found`);
+        }
+
+        // Resend invite with the same payload format as createInvite
+        await client.resendInvite(organizationId, {
+          invitee: { email: member.email },
+          role_ids: [selectedRole.id],
+          inviter: { email: currentUserEmail || 'system@example.com' },
+          send_invitation_email: true,
+          invitation_id: member.id || ''
+        });
         await fetchData();
+        setStatusMessage({ type: 'success', message: `Invitation resent to ${member.email}` });
+        setTimeout(() => setStatusMessage(null), 5000);
       } catch (err) {
-        throw new Error(`Failed to resend invite: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        const errorMessage = getErrorMessage(err);
+        setStatusMessage({ type: 'error', message: `Failed to resend invite: ${errorMessage}` });
+        setTimeout(() => setStatusMessage(null), 5000);
+        throw new Error(`Failed to resend invite: ${errorMessage}`);
+      } finally {
+        setActionLoading(prev => ({ ...prev, [loadingKey]: false }));
       }
     },
-    [client, organizationId, fetchData]
+    [client, organizationId, fetchData, invites, roles, currentUserEmail]
+  );
+
+  const handleDeleteInvite = useCallback(
+    async (inviteId: string) => {
+      const loadingKey = `delete-${inviteId}`;
+      try {
+        setActionLoading(prev => ({ ...prev, [loadingKey]: true }));
+        setStatusMessage(null);
+        const invite = invites.find(inv => inv.id === inviteId);
+        if (!invite) {
+          throw new Error('Invite not found');
+        }
+
+        await client.deleteInvite(organizationId, inviteId);
+        await fetchData();
+        setStatusMessage({ type: 'success', message: `Invitation to ${invite.email} deleted successfully` });
+        setTimeout(() => setStatusMessage(null), 5000);
+      } catch (err) {
+        const errorMessage = getErrorMessage(err);
+        setStatusMessage({ type: 'error', message: `Failed to delete invite: ${errorMessage}` });
+        setTimeout(() => setStatusMessage(null), 5000);
+        throw new Error(`Failed to delete invite: ${errorMessage}`);
+      } finally {
+        setActionLoading(prev => ({ ...prev, [loadingKey]: false }));
+      }
+    },
+    [client, organizationId, fetchData, invites]
   );
 
   // Loading state
@@ -283,6 +388,17 @@ export function TeamManager({
               Invite Member
             </button>
           )}
+        </div>
+      )}
+
+      {/* Status Message */}
+      {statusMessage && (
+        <div 
+          className={`sk-status-message sk-status-message--${statusMessage.type}`}
+          role="alert"
+          aria-live="polite"
+        >
+          {statusMessage.message}
         </div>
       )}
 
@@ -351,19 +467,11 @@ export function TeamManager({
             className="sk-team-manager__panel"
           >
             <MembersTable
-              members={
-                invites.map((inv: any) => ({
-                  id: inv.id,
-                  userId: inv.id,
-                  organizationId,
-                  email: inv.email,
-                  role: inv.role,
-                  joinedAt: inv.createdAt,
-                  updatedAt: inv.updatedAt || inv.createdAt,
-                }))
-              }
+              members={invites}
               roles={roles}
               onResendInvite={canManageTeam ? handleResendInvite : undefined}
+              onDeleteInvite={canManageTeam ? handleDeleteInvite : undefined}
+              actionLoading={actionLoading}
               emptyMessage={
                 typeof slots.emptyInvites === 'string'
                   ? slots.emptyInvites
@@ -393,7 +501,7 @@ export function TeamManager({
         <InviteDialog
           isOpen={isInviteDialogOpen}
           onClose={() => setIsInviteDialogOpen(false)}
-          onInvite={handleInvite}
+          onInvite={handleInviteMember}
           roles={roles}
         />
       )}

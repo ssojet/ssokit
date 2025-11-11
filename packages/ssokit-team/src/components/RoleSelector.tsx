@@ -27,7 +27,7 @@ export function RoleSelector({
       aria-label="Select role"
     >
       {roles.map((role) => (
-        <option key={role.name} value={role.name}>
+        <option key={role.id} value={role.name}>
           {role.name}
         </option>
       ))}

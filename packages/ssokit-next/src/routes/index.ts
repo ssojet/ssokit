@@ -129,13 +129,14 @@ export function createRouteHandlers() {
       }
     },
 
-    // POST /api/authkit/orgs/[orgId]/invites/[inviteId]/resend
+    // POST /api/authkit/orgs/[orgId]/invites/resend
     async resendInvite(
-      _req: NextRequest,
-      { params }: { params: { orgId: string; inviteId: string } }
+      req: NextRequest,
+      { params }: { params: { orgId: string } }
     ) {
       try {
-        const data = await client.resendInvite(params.orgId, params.inviteId);
+        const payload = await req.json();
+        const data = await client.resendInvite(params.orgId, payload);
         return NextResponse.json(data);
       } catch (err: any) {
         return NextResponse.json(

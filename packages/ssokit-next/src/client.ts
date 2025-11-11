@@ -248,9 +248,9 @@ export class SSOJetClient {
   }
 
   // Invites
-  async listInvites(orgId: string) {
-    console.log('==== Listing invites from SSOJetClient');
-    return this.request(`/api/v1/auth/tenants/${orgId}/users`);
+  async listInvites(orgId: string, status?: string) {
+    const query = status ? `?status=${status}` : '';
+    return this.request(`/api/v1/auth/tenants/${orgId}/invitations${query}`);
   }
 
   async createInvite(orgId: string, data: any) {
@@ -260,9 +260,22 @@ export class SSOJetClient {
     });
   }
 
-  async resendInvite(orgId: string, inviteId: string) {
-    return this.request(`/api/v1/auth/tenants/${orgId}/invitations/${inviteId}/resend`, {
+  async resendInvite(orgId: string, payload: {
+    invitee: { email: string };
+    role_ids: string[];
+    inviter: { email: string };
+    send_invitation_email?: boolean;
+    invitation_id?: string;
+  }) {
+    return this.request(`/api/v1/auth/tenants/${orgId}/invitations/resend`, {
       method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteInvite(orgId: string, invitationId: string) {
+    return this.request(`/api/v1/auth/tenants/${orgId}/invitations?invitation_id=${invitationId}`, {
+      method: 'DELETE',
     });
   }
 

@@ -30,6 +30,8 @@ export interface MembersTableProps {
   onUpdateRole?: (memberId: string, role: string) => Promise<void>;
   onRemoveMember?: (memberId: string) => Promise<void>;
   onResendInvite?: (inviteId: string) => Promise<void>;
+  onDeleteInvite?: (inviteId: string) => Promise<void>;
+  actionLoading?: { [key: string]: boolean };
   isLoading?: boolean;
   emptyMessage?: string;
   className?: string;

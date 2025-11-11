@@ -195,9 +195,26 @@ export type UserOrganizationsResponse = z.infer<typeof UserOrganizationsResponse
 // ============================================================================
 
 export const WebhookEventTypeSchema = z.enum([
+  // Legacy team events
   'team.member.added',
   'team.member.removed',
   'team.member.role_updated',
+  // User events
+  'user.created',
+  'user.updated',
+  'user.deleted',
+  // Directory sync events
+  'group.created',
+  'group.updated',
+  'group.deleted',
+  'user.group.added',
+  'user.group.removed',
+  // Team invite events
+  'invitation.sent',
+  'invitation.accepted',
+  'invitation.revoked',
+  // Tenant events
+  'tenant.created',
 ]);
 
 export type WebhookEventType = z.infer<typeof WebhookEventTypeSchema>;
@@ -236,15 +253,187 @@ export type WebhookMemberRoleUpdatedPayload = z.infer<
   typeof WebhookMemberRoleUpdatedPayloadSchema
 >;
 
+// User event payloads
+export const WebhookUserCreatedPayloadSchema = z.object({
+  user: z.object({
+    id: z.string(),
+    email: z.string().email(),
+    first_name: z.string().optional(),
+    created_at: z.string(),
+    source: z.string().optional(),
+    metadata: z.record(z.unknown()).optional(),
+  }),
+});
+
+export type WebhookUserCreatedPayload = z.infer<typeof WebhookUserCreatedPayloadSchema>;
+
+export const WebhookUserUpdatedPayloadSchema = z.object({
+  user: z.object({
+    id: z.string(),
+    email: z.string().email(),
+    first_name: z.string().optional(),
+    modified_at: z.string(),
+    metadata: z.record(z.unknown()).optional(),
+  }),
+});
+
+export type WebhookUserUpdatedPayload = z.infer<typeof WebhookUserUpdatedPayloadSchema>;
+
+export const WebhookUserDeletedPayloadSchema = z.object({
+  user: z.object({
+    id: z.string(),
+    email: z.string().email(),
+    deleted_at: z.string(),
+  }),
+});
+
+export type WebhookUserDeletedPayload = z.infer<typeof WebhookUserDeletedPayloadSchema>;
+
+// Group event payloads
+export const WebhookGroupCreatedPayloadSchema = z.object({
+  group: z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().optional(),
+    created_at: z.string(),
+    external_id: z.string().optional(),
+    metadata: z.record(z.unknown()).optional(),
+  }),
+  source: z.string().optional(),
+});
+
+export type WebhookGroupCreatedPayload = z.infer<typeof WebhookGroupCreatedPayloadSchema>;
+
+export const WebhookGroupUpdatedPayloadSchema = z.object({
+  group: z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().optional(),
+    modified_at: z.string(),
+    external_id: z.string().optional(),
+    metadata: z.record(z.unknown()).optional(),
+  }),
+  source: z.string().optional(),
+});
+
+export type WebhookGroupUpdatedPayload = z.infer<typeof WebhookGroupUpdatedPayloadSchema>;
+
+export const WebhookGroupDeletedPayloadSchema = z.object({
+  group: z.object({
+    id: z.string(),
+    name: z.string(),
+    deleted_at: z.string(),
+  }),
+  source: z.string().optional(),
+});
+
+export type WebhookGroupDeletedPayload = z.infer<typeof WebhookGroupDeletedPayloadSchema>;
+
+// User-Group membership event payloads
+export const WebhookUserGroupAddedPayloadSchema = z.object({
+  user: z.object({
+    id: z.string(),
+    email: z.string().email(),
+  }),
+  group: z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
+  source: z.string().optional(),
+});
+
+export type WebhookUserGroupAddedPayload = z.infer<typeof WebhookUserGroupAddedPayloadSchema>;
+
+export const WebhookUserGroupRemovedPayloadSchema = z.object({
+  user: z.object({
+    id: z.string(),
+    email: z.string().email(),
+  }),
+  group: z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
+  source: z.string().optional(),
+});
+
+export type WebhookUserGroupRemovedPayload = z.infer<typeof WebhookUserGroupRemovedPayloadSchema>;
+
+// Invitation event payloads
+export const WebhookInvitationSentPayloadSchema = z.object({
+  invitation: z.object({
+    id: z.string(),
+    email: z.string().email(),
+    tenant_id: z.string(),
+    tenant_name: z.string().optional(),
+    role: z.string(),
+    sent_at: z.string(),
+    expires_at: z.string().optional(),
+  }),
+});
+
+export type WebhookInvitationSentPayload = z.infer<typeof WebhookInvitationSentPayloadSchema>;
+
+export const WebhookInvitationAcceptedPayloadSchema = z.object({
+  invitation: z.object({
+    id: z.string(),
+    email: z.string().email(),
+    tenant_id: z.string(),
+    accepted_at: z.string(),
+  }),
+  user: z.object({
+    id: z.string(),
+    email: z.string().email(),
+  }),
+});
+
+export type WebhookInvitationAcceptedPayload = z.infer<typeof WebhookInvitationAcceptedPayloadSchema>;
+
+export const WebhookInvitationRevokedPayloadSchema = z.object({
+  invitation: z.object({
+    id: z.string(),
+    email: z.string().email(),
+    tenant_id: z.string(),
+    revoked_at: z.string(),
+    reason: z.string().optional(),
+  }),
+});
+
+export type WebhookInvitationRevokedPayload = z.infer<typeof WebhookInvitationRevokedPayloadSchema>;
+
+// Tenant event payloads
+export const WebhookTenantCreatedPayloadSchema = z.object({
+  tenant: z.object({
+    id: z.string(),
+    name: z.string(),
+    created_at: z.string(),
+    domain: z.string().optional(),
+    metadata: z.record(z.unknown()).optional(),
+  }),
+});
+
+export type WebhookTenantCreatedPayload = z.infer<typeof WebhookTenantCreatedPayloadSchema>;
+
 export const WebhookEventSchema = z.object({
-  id: z.string(),
-  type: WebhookEventTypeSchema,
+  event: WebhookEventTypeSchema,
+  event_id: z.string(),
+  created_at: z.string(),
   data: z.union([
     WebhookMemberAddedPayloadSchema,
     WebhookMemberRemovedPayloadSchema,
     WebhookMemberRoleUpdatedPayloadSchema,
+    WebhookUserCreatedPayloadSchema,
+    WebhookUserUpdatedPayloadSchema,
+    WebhookUserDeletedPayloadSchema,
+    WebhookGroupCreatedPayloadSchema,
+    WebhookGroupUpdatedPayloadSchema,
+    WebhookGroupDeletedPayloadSchema,
+    WebhookUserGroupAddedPayloadSchema,
+    WebhookUserGroupRemovedPayloadSchema,
+    WebhookInvitationSentPayloadSchema,
+    WebhookInvitationAcceptedPayloadSchema,
+    WebhookInvitationRevokedPayloadSchema,
+    WebhookTenantCreatedPayloadSchema,
   ]),
-  createdAt: z.string(),
 });
 
 export type WebhookEvent = z.infer<typeof WebhookEventSchema>;

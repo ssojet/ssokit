@@ -246,10 +246,11 @@ my-nextjs-app/
 ```bash
 # SSOJet Configuration
 SSOJET_BASE=https://api.ssojet.com
-SSOJET_CLIENT_ID=your-client-id
-SSOJET_CLIENT_SECRET=your-client-secret
-SSOJET_ISSUER=https://your-domain.auth.ssojet.com
-SSOJET_REDIRECT_URI=http://localhost:3000/api/auth/callback
+DEFAULT_SSOJET_AUTHORITY=https://your-domain.auth.ssojet.com
+DEFAULT_SSOJET_CLIENT_ID=cli_d3vlr9k4
+DEFAULT_SSOJET_CLIENT_SECRET=sk_d3
+DEFAULT_SSOJET_API_URL=https://api.ssojet.com/api/v1
+DEFAULT_SSOJET_REDIRECT_URI=http://localhost:3000/api/auth/callback
 
 # NextAuth
 NEXTAUTH_URL=http://localhost:3000
@@ -257,7 +258,7 @@ NEXTAUTH_SECRET=your-nextauth-secret
 
 # SSOKit Configuration
 NEXT_PUBLIC_SSOJET_BASE=https://api.ssojet.com
-NEXT_PUBLIC_SSOJET_CLIENT_ID=your-client-id
+NEXT_PUBLIC_DEFAULT_SSOJET_CLIENT_ID=cli_d3vlr9k4
 NEXT_PUBLIC_SSOKIT_TEAM_MANAGER_ROLES=Owner,Admin
 ```
 
@@ -271,9 +272,9 @@ import { SSOJetProvider } from '@ssojet/ssokit-next';
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     SSOJetProvider({
-      clientId: process.env.SSOJET_CLIENT_ID!,
-      clientSecret: process.env.SSOJET_CLIENT_SECRET!,
-      issuer: process.env.SSOJET_ISSUER!,
+      clientId: process.env.DEFAULT_SSOJET_CLIENT_ID!,
+      clientSecret: process.env.DEFAULT_SSOJET_CLIENT_SECRET!,
+      issuer: process.env.DEFAULT_SSOJET_AUTHORITY!,
     }),
   ],
   callbacks: {
@@ -314,7 +315,7 @@ export function TeamManagement({ organizationId }: TeamManagementProps) {
 
   const client = new SSOJetClient(session.accessToken, {
     baseUrl: process.env.NEXT_PUBLIC_SSOJET_BASE,
-    clientId: process.env.NEXT_PUBLIC_SSOJET_CLIENT_ID,
+    clientId: process.env.NEXT_PUBLIC_DEFAULT_SSOJET_CLIENT_ID,
   });
 
   return (
@@ -460,3 +461,6 @@ import '../styles/globals.css';
 ---
 
 This guide provides multiple approaches to integrate SSOKit into your projects without public publishing, allowing you to maintain full control over your codebase while enabling seamless integration across your organization.
+
+
+export PATH=$PATH:~/.npm-global/bin

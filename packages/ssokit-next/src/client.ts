@@ -121,15 +121,15 @@ export class SSOJetClient {
     // Set client ID from options or environment variables
     if (options?.clientId) {
       this.clientId = options.clientId;
-    } else if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SSOJET_CLIENT_ID) {
+    } else if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_DEFAULT_SSOJET_CLIENT_ID) {
       // Client-side: use public env var
-      this.clientId = process.env.NEXT_PUBLIC_SSOJET_CLIENT_ID;
+      this.clientId = process.env.NEXT_PUBLIC_DEFAULT_SSOJET_CLIENT_ID;
     } else if (serverConfig?.clientId) {
       // Server-side: use from server config
       this.clientId = serverConfig.clientId;
-    } else if (process.env.SSOJET_CLIENT_ID) {
+    } else if (process.env.DEFAULT_SSOJET_CLIENT_ID) {
       // Fallback: direct env var
-      this.clientId = process.env.SSOJET_CLIENT_ID;
+      this.clientId = process.env.DEFAULT_SSOJET_CLIENT_ID;
     }
     
     this.accessToken = accessToken;

@@ -140,7 +140,7 @@ const token = getTokenFromYourAuthSystem();
 NEXT_PUBLIC_SSOJET_BASE=https://api.ssojet.com
 
 # Optional: Override via props
-NEXT_PUBLIC_SSOJET_CLIENT_ID=your_client_id
+NEXT_PUBLIC_DEFAULT_SSOJET_CLIENT_ID=cli_d3vlr9k4
 ```
 
 ### Props Override

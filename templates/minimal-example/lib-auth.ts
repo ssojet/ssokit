@@ -5,9 +5,9 @@ import { SSOJetProvider } from '@ssojet/ssokit-next';
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     SSOJetProvider({
-      clientId: process.env.SSOJET_CLIENT_ID!,
-      clientSecret: process.env.SSOJET_CLIENT_SECRET!,
-      issuer: process.env.SSOJET_ISSUER!,
+      clientId: process.env.DEFAULT_SSOJET_CLIENT_ID!,
+      clientSecret: process.env.DEFAULT_SSOJET_CLIENT_SECRET!,
+      issuer: process.env.DEFAULT_SSOJET_AUTHORITY!,
     }),
   ],
   callbacks: {

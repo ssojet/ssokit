@@ -49,7 +49,7 @@ export async function handleEventToSCIM({
  * - Add user to group
  */
 async function handleMemberAdded(
-  event: WebhookEvent & { type: 'team.member.added' },
+  event: WebhookEvent & { event: 'team.member.added' },
   scimClient: ScimClient,
   scopeStrategy: OrgIdScopeStrategy
 ): Promise<void> {
@@ -111,7 +111,7 @@ async function handleMemberAdded(
  * - Optionally deactivate user if they have no other groups
  */
 async function handleMemberRemoved(
-  event: WebhookEvent & { type: 'team.member.removed' },
+  event: WebhookEvent & { event: 'team.member.removed' },
   scimClient: ScimClient,
   scopeStrategy: OrgIdScopeStrategy
 ): Promise<void> {
@@ -157,7 +157,7 @@ async function handleMemberRemoved(
  * - Add user to new role group
  */
 async function handleMemberRoleUpdated(
-  event: WebhookEvent & { type: 'team.member.role_updated' },
+  event: WebhookEvent & { event: 'team.member.role_updated' },
   scimClient: ScimClient,
   scopeStrategy: OrgIdScopeStrategy
 ): Promise<void> {

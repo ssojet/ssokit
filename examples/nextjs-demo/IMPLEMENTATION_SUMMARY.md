@@ -74,10 +74,11 @@ cp .env.example .env.local
 Edit `.env.local` with your SSOJet credentials:
 ```bash
 # Required: SSOJet OIDC Configuration
-SSOJET_CLIENT_ID=your-oidc-client-id
-SSOJET_CLIENT_SECRET=your-oidc-client-secret
-SSOJET_ISSUER=https://dns-mo.auth.ssojet.com
-SSOJET_REDIRECT_URI=http://localhost:3000/api/auth/callback
+DEFAULT_SSOJET_AUTHORITY=https://dns-mo.auth.ssojet.com
+DEFAULT_SSOJET_CLIENT_ID=cli_d3vlr9k4
+DEFAULT_SSOJET_CLIENT_SECRET=sk_d3
+DEFAULT_SSOJET_API_URL=https://api.ssojet.com/api/v1
+DEFAULT_SSOJET_REDIRECT_URI=http://localhost:3000/api/auth/callback
 
 # Required: NextAuth Configuration  
 NEXTAUTH_URL=http://localhost:3000
@@ -164,7 +165,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the demo.
    - Ensure redirect URI in SSOJet matches: `http://localhost:3000/api/auth/callback`
 
 2. **"Invalid client credentials"**
-   - Verify `SSOJET_CLIENT_ID` and `SSOJET_CLIENT_SECRET` are correct
+   - Verify `DEFAULT_SSOJET_CLIENT_ID` and `DEFAULT_SSOJET_CLIENT_SECRET` are correct
 
 3. **"Session not found"**  
    - Make sure `NEXTAUTH_SECRET` is set and consistent

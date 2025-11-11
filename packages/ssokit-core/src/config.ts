@@ -39,7 +39,7 @@ export interface AuthKitPublicConfig {
 export function readSSOJetServerConfig(): SSOJetServerConfig {
   const baseUrl = process.env.SSOJET_BASE;
   const apiKey = process.env.SSOJET_API_KEY;
-  const clientId = process.env.SSOJET_CLIENT_ID;
+  const clientId = process.env.DEFAULT_SSOJET_CLIENT_ID;
 
   if (!baseUrl) {
     throw new ConfigError(

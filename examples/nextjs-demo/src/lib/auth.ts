@@ -74,9 +74,9 @@ export const authOptions: NextAuthOptions = {
       id: 'ssojet',
       name: 'SSOJet',
       type: 'oauth',
-      wellKnown: `${process.env.SSOJET_ISSUER}/.well-known/openid-configuration`,
-      clientId: process.env.SSOJET_CLIENT_ID!,
-      clientSecret: process.env.SSOJET_CLIENT_SECRET!,
+      wellKnown: `${process.env.DEFAULT_SSOJET_AUTHORITY}/.well-known/openid-configuration`,
+      clientId: process.env.DEFAULT_SSOJET_CLIENT_ID!,
+      clientSecret: process.env.DEFAULT_SSOJET_CLIENT_SECRET!,
       authorization: {
         params: {
           scope: 'openid profile email',
@@ -197,7 +197,7 @@ async function getOIDCConfig() {
   if (oidcConfig) return oidcConfig;
   
   try {
-    const wellKnownUrl = `${process.env.SSOJET_ISSUER}/.well-known/openid-configuration`;
+    const wellKnownUrl = `${process.env.DEFAULT_SSOJET_AUTHORITY}/.well-known/openid-configuration`;
     console.log('[AUTH] Fetching OIDC configuration from:', wellKnownUrl);
     
     const response = await fetch(wellKnownUrl);
@@ -230,7 +230,7 @@ async function refreshAccessToken(token: JWT) {
     } catch (discoveryError) {
       console.warn('[AUTH] OIDC discovery failed, using fallback token endpoint');
       // Fallback to common token endpoint paths
-      tokenEndpoint = `${process.env.SSOJET_ISSUER}/token`;
+      tokenEndpoint = `${process.env.DEFAULT_SSOJET_AUTHORITY}/token`;
     }
     
     if (!token.refreshToken) {
@@ -245,8 +245,8 @@ async function refreshAccessToken(token: JWT) {
     });
     
     const requestBody = new URLSearchParams({
-      client_id: process.env.SSOJET_CLIENT_ID!,
-      client_secret: process.env.SSOJET_CLIENT_SECRET!,
+      client_id: process.env.DEFAULT_SSOJET_CLIENT_ID!,
+      client_secret: process.env.DEFAULT_SSOJET_CLIENT_SECRET!,
       grant_type: 'refresh_token',
       refresh_token: token.refreshToken as string,
     });

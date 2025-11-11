@@ -132,9 +132,10 @@ await apiClient.createInvite(organizationId, {
 ### Environment Variables
 ```bash
 # Authentication (Required)
-SSOJET_CLIENT_ID=your_client_id
-SSOJET_CLIENT_SECRET=your_client_secret
-SSOJET_ISSUER=https://your-domain.auth.ssojet.com
+DEFAULT_SSOJET_AUTHORITY=https://your-domain.auth.ssojet.com
+DEFAULT_SSOJET_CLIENT_ID=cli_d3vlr9k4
+DEFAULT_SSOJET_CLIENT_SECRET=sk_d3
+DEFAULT_SSOJET_API_URL=https://api.ssojet.com/api/v1
 
 # API Configuration (Required)
 SSOJET_BASE=https://api.ssojet.com

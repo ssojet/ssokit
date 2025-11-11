@@ -40,7 +40,7 @@ export function TeamManagement({ organizationId }: TeamManagementProps) {
   // Create SSOJet client with user's access token
   const client = new SSOJetClient(session.accessToken, {
     baseUrl: process.env.NEXT_PUBLIC_SSOJET_BASE,
-    clientId: process.env.NEXT_PUBLIC_SSOJET_CLIENT_ID,
+    clientId: process.env.NEXT_PUBLIC_DEFAULT_SSOJET_CLIENT_ID,
   });
 
   return (

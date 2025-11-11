@@ -24,12 +24,11 @@
   "types": "./dist/index.d.ts",
   "files": ["dist", "tailwind", "README.md"],
   "scripts": {
-    "build": "tsup && npm run build:css",
-    "build:css": "mkdir -p dist && cat src/tokens.css src/presets/*.css > dist/styles.css",
-    "dev": "npm run build:css && tsup --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist .turbo"
+    "clean": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true}); require('fs').rmSync('.turbo', {recursive: true, force: true})\""
   },
   "devDependencies": {
     "@types/node": "^20.11.24",

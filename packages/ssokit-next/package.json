@@ -1,8 +1,13 @@
 {
-    "name": "@ssojet/ssokit-next",
+  "name": "@ssojet/ssokit-next",
   "version": "0.1.0",
   "description": "Next.js App Router helpers and route handlers for SSOJet AuthKit",
-  "keywords": ["ssojet", "authkit", "nextjs", "app-router"],
+  "keywords": [
+    "ssojet",
+    "authkit",
+    "nextjs",
+    "app-router"
+  ],
   "homepage": "https://github.com/ssojet/ssojet-authkit#readme",
   "repository": {
     "type": "git",
@@ -24,7 +29,10 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -33,7 +41,7 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@ssojet/ssokit-core": "workspace:*"
+    "@ssojet/ssokit-core": "0.1.0"
   },
   "peerDependencies": {
     "next": "^14.0.0 || ^15.0.0"

@@ -1,5 +1,5 @@
 {
-    "name": "@ssojet/ssokit-team",
+  "name": "@ssojet/ssokit-team",
   "version": "0.1.0",
   "description": "Drop-in TeamManager widget for SSOJet AuthKit",
   "type": "module",
@@ -27,10 +27,10 @@
     "react-dom": "^18.0.0"
   },
   "dependencies": {
-    "@ssojet/ssokit-core": "workspace:*",
-    "@ssojet/ssokit-css": "workspace:*",
-    "@ssojet/ssokit-next": "workspace:*",
-    "@ssojet/ssokit-react": "workspace:*"
+    "@ssojet/ssokit-core": "0.1.0",
+    "@ssojet/ssokit-css": "0.1.0",
+    "@ssojet/ssokit-next": "0.1.0",
+    "@ssojet/ssokit-react": "0.1.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.47",

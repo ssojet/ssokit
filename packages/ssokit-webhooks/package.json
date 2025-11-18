@@ -2,7 +2,13 @@
   "name": "@ssojet/ssokit-webhooks",
   "version": "0.1.0",
   "description": "Webhook verification and SCIM provisioning for SSOJet AuthKit",
-  "keywords": ["ssojet", "authkit", "webhooks", "scim", "provisioning"],
+  "keywords": [
+    "ssojet",
+    "authkit",
+    "webhooks",
+    "scim",
+    "provisioning"
+  ],
   "homepage": "https://github.com/ssojet/ssojet-authkit#readme",
   "repository": {
     "type": "git",
@@ -20,7 +26,10 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -30,7 +39,7 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@ssojet/ssokit-core": "workspace:*"
+    "@ssojet/ssokit-core": "0.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",

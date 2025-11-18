@@ -2,7 +2,12 @@
   "name": "@ssojet/ssokit-react",
   "version": "0.1.0",
   "description": "React hooks and providers for SSOJet AuthKit",
-  "keywords": ["ssojet", "authkit", "react", "hooks"],
+  "keywords": [
+    "ssojet",
+    "authkit",
+    "react",
+    "hooks"
+  ],
   "homepage": "https://github.com/ssojet/ssojet-authkit#readme",
   "repository": {
     "type": "git",
@@ -20,7 +25,10 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -30,8 +38,8 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@ssojet/ssokit-core": "workspace:*",
-    "@ssojet/ssokit-css": "workspace:*"
+    "@ssojet/ssokit-core": "0.1.0",
+    "@ssojet/ssokit-css": "0.1.0"
   },
   "peerDependencies": {
     "react": "^18.0.0"

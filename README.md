@@ -1,11 +1,11 @@
-# SSOJet AuthKit
+# SSOJet SSOKit
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![npm version](https://badge.fury.io/js/@ssojet%2Fauthkit-core.svg)](https://www.npmjs.com/package/@ssojet/authkit-core)
+[![npm version](https://badge.fury.io/js/@ssojet%2Fssokit-core.svg)](https://www.npmjs.com/package/@ssojet/ssokit-core)
 
 **Production-grade team management UI + webhook-driven SCIM provisioning for SSOJet**
 
-SSOJet AuthKit is an open-source, batteries-included solution for building team management experiences powered by [SSOJet](https://ssojet.com) APIs. It features drop-in React widgets, headless hooks, and automatic SCIM 2.0 provisioning triggered by webhooks.
+SSOJet SSOKit is an open-source, batteries-included solution for building team management experiences powered by [SSOJet](https://ssojet.com) APIs. It features drop-in React widgets, headless hooks, and automatic SCIM 2.0 provisioning triggered by webhooks.
 
 ---
 
@@ -34,12 +34,12 @@ SSOJet AuthKit is an open-source, batteries-included solution for building team 
 
 | Package | Description | Version |
 |---------|-------------|---------|
-| [`@ssojet/authkit-core`](packages/authkit-core) | Types, schemas, errors, config | ![npm](https://img.shields.io/npm/v/@ssojet/authkit-core) |
-| [`@ssojet/authkit-react`](packages/authkit-react) | React hooks and providers | ![npm](https://img.shields.io/npm/v/@ssojet/authkit-react) |
-| [`@ssojet/authkit-team`](packages/authkit-team) | TeamManager drop-in widget | ![npm](https://img.shields.io/npm/v/@ssojet/authkit-team) |
-| [`@ssojet/authkit-next`](packages/authkit-next) | Next.js route handlers | ![npm](https://img.shields.io/npm/v/@ssojet/authkit-next) |
-| [`@ssojet/authkit-webhooks`](packages/authkit-webhooks) | Webhook + SCIM provisioning | ![npm](https://img.shields.io/npm/v/@ssojet/authkit-webhooks) |
-| [`@ssojet/authkit-css`](packages/authkit-css) | Theming + Tailwind preset | ![npm](https://img.shields.io/npm/v/@ssojet/authkit-css) |
+| [`@ssojet/ssokit-core`](packages/ssokit-core) | Types, schemas, errors, config | ![npm](https://img.shields.io/npm/v/@ssojet/ssokit-core) |
+| [`@ssojet/ssokit-react`](packages/ssokit-react) | React hooks and providers | ![npm](https://img.shields.io/npm/v/@ssojet/ssokit-react) |
+| [`@ssojet/ssokit-team`](packages/ssokit-team) | TeamManager drop-in widget | ![npm](https://img.shields.io/npm/v/@ssojet/ssokit-team) |
+| [`@ssojet/ssokit-next`](packages/ssokit-next) | Next.js route handlers | ![npm](https://img.shields.io/npm/v/@ssojet/ssokit-next) |
+| [`@ssojet/ssokit-webhooks`](packages/ssokit-webhooks) | Webhook + SCIM provisioning | ![npm](https://img.shields.io/npm/v/@ssojet/ssokit-webhooks) |
+| [`@ssojet/ssokit-css`](packages/ssokit-css) | Theming + Tailwind preset | ![npm](https://img.shields.io/npm/v/@ssojet/ssokit-css) |
 
 ---
 
@@ -48,7 +48,7 @@ SSOJet AuthKit is an open-source, batteries-included solution for building team 
 ### 1. Install Packages
 
 ```bash
-pnpm add @ssojet/authkit-react @ssojet/authkit-next @ssojet/authkit-webhooks @ssojet/authkit-css
+pnpm add @ssojet/ssokit-react @ssojet/ssokit-next @ssojet/ssokit-webhooks @ssojet/ssokit-css
 ```
 
 ### 2. Set Environment Variables
@@ -57,8 +57,10 @@ pnpm add @ssojet/authkit-react @ssojet/authkit-next @ssojet/authkit-webhooks @ss
 # .env.local
 
 # SSOJet API (server-side)
-SSOJET_BASE=https://api.ssojet.com
-SSOJET_API_KEY=sk_live_xxx
+DEFAULT_SSOJET_API_URL=https://api.ssojet.com
+DEFAULT_SSOJET_CLIENT_ID=your-client-id
+DEFAULT_SSOJET_CLIENT_SECRET=your-client-secret
+DEFAULT_SSOJET_AUTHORITY=https://api.ssojet.com
 
 # Webhook verification
 SSOJET_WEBHOOK_SECRET=whsec_xxx
@@ -67,15 +69,16 @@ SSOJET_WEBHOOK_SECRET=whsec_xxx
 SCIM_BASE_URL=https://scim.target.com/scim/v2
 SCIM_TOKEN=scim_bearer_xxx
 
-# Optional: Client-safe theme
-NEXT_PUBLIC_AUTHKIT_THEME='{"primary":"#2563eb","radius":"12px"}'
+# Optional: Client-safe config
+NEXT_PUBLIC_DEFAULT_SSOJET_CLIENT_ID=your-client-id
+NEXT_PUBLIC_DEFAULT_SSOJET_AUTHORITY=https://api.ssojet.com
 ```
 
 ### 3. Setup Next.js Route Handlers
 
 ```typescript
-// app/api/authkit/orgs/[orgId]/route.ts
-import { createRouteHandlers } from '@ssojet/authkit-next/routes';
+// app/api/ssokit/orgs/[orgId]/route.ts
+import { createRouteHandlers } from '@ssojet/ssokit-next/routes';
 
 const handlers = createRouteHandlers();
 
@@ -84,7 +87,7 @@ export const PATCH = handlers.updateOrganization;
 ```
 
 ```typescript
-// app/api/authkit/orgs/[orgId]/members/route.ts
+// app/api/ssokit/orgs/[orgId]/members/route.ts
 const handlers = createRouteHandlers();
 
 export const GET = handlers.listMembers;
@@ -96,15 +99,15 @@ export const POST = handlers.addMember;
 ### 4. Setup Webhook Endpoint
 
 ```typescript
-// app/api/authkit/webhooks/route.ts
+// app/api/ssokit/webhooks/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import {
   verifySignature,
   parseEvent,
   createScimClient,
   handleEventToSCIM,
-} from '@ssojet/authkit-webhooks';
-import { readWebhookServerConfig, readScimServerConfig } from '@ssojet/authkit-core/config';
+} from '@ssojet/ssokit-webhooks';
+import { readWebhookServerConfig, readScimServerConfig } from '@ssojet/ssokit-core/config';
 
 export const runtime = 'nodejs';
 
@@ -141,19 +144,21 @@ export async function POST(req: NextRequest) {
 ### 5. Use TeamManager Widget
 
 ```tsx
-import { AuthKitProvider } from '@ssojet/authkit-react';
-import { TeamManager } from '@ssojet/authkit-team';
-import '@ssojet/authkit-team/styles.css';
+import { SSOJetClient } from '@ssojet/ssokit-next';
+import { TeamManager } from '@ssojet/ssokit-team';
+import '@ssojet/ssokit-css';
 
-function App() {
+function TeamPage() {
+  const client = new SSOJetClient(accessToken);
+  
   return (
-    <AuthKitProvider config={{ baseUrl: '/api/authkit' }}>
-      <TeamManager
-        organizationId="org_123"
-        currentUserId="user_456"
-        showAuditLog
-      />
-    </AuthKitProvider>
+    <TeamManager
+      organizationId="org_123"
+      client={client}
+      currentUserId="user_456"
+      currentUserEmail="user@example.com"
+      showAuditLog
+    />
   );
 }
 ```
@@ -177,15 +182,15 @@ function App() {
 │                         Your Next.js App                      │
 │                                                               │
 │  ┌──────────────────┐         ┌─────────────────────────┐   │
-│  │  TeamManager UI  │────────▶│ /api/authkit/orgs/...   │   │
-│  │  (@authkit-team) │         │ (@authkit-next routes)  │   │
+│  │  TeamManager UI  │────────▶│ SSOJetClient            │   │
+│  │  (@ssokit-team)  │         │ (@ssokit-next)          │   │
 │  └──────────────────┘         └─────────────────────────┘   │
-│           │                              │                    │
-│           │                              ▼                    │
-│  ┌────────▼────────┐         ┌─────────────────────────┐   │
-│  │ AuthKitProvider │         │    SSOJet API Client    │   │
-│  │ (@authkit-react)│         │   (SSOJET_API_KEY)      │   │
-│  └─────────────────┘         └─────────────────────────┘   │
+│                                          │                    │
+│                                          ▼                    │
+│                              ┌─────────────────────────┐   │
+│                              │    SSOJet API Client    │   │
+│                              │   (CLIENT_ID/SECRET)    │   │
+│                              └─────────────────────────┘   │
 │                                          │                    │
 └──────────────────────────────────────────┼───────────────────┘
                                            │
@@ -198,8 +203,8 @@ function App() {
                                            │ Webhook Events
                                            ▼
                               ┌─────────────────────────┐
-                              │ /api/v1/webhooks   │
-                              │ (@authkit-webhooks)     │
+                              │ /api/v1/webhooks        │
+                              │ (@ssokit-webhooks)      │
                               └─────────────────────────┘
                                            │
                                            ▼
@@ -210,30 +215,30 @@ function App() {
 ```
 
 **Flow:**
-1. **UI → Your API → SSOJet**: TeamManager calls your Next.js routes, which proxy to SSOJet with server API key
+1. **UI → SSOJet Client → SSOJet API**: TeamManager uses SSOJetClient directly to communicate with SSOJet APIs
 2. **SSOJet → Webhook → SCIM**: Team events trigger webhooks, verified and converted to SCIM operations
 
 ---
 
 ## 🎨 Theming
 
-AuthKit supports multiple theming approaches:
+SSOKit supports multiple theming approaches:
 
 ### 1. Presets
 ```tsx
-<TeamManager theme="dark" />
+import '@ssojet/ssokit-css/presets/dark.css';
 ```
 
 ### 2. Custom Tokens
-```tsx
-<TeamManager theme={{ primary: '#8b5cf6', radius: '16px' }} />
+```css
+import '@ssojet/ssokit-css/tokens.css';
 ```
 
 ### 3. CSS Variables
 ```css
-.ak-root {
-  --ak-primary: #2563eb;
-  --ak-radius: 12px;
+.sk-root {
+  --sk-primary: #2563eb;
+  --sk-radius: 12px;
 }
 ```
 
@@ -241,7 +246,7 @@ AuthKit supports multiple theming approaches:
 ```javascript
 // tailwind.config.js
 module.exports = {
-  presets: [require('@ssojet/authkit-css/tailwind/preset.cjs')],
+  presets: [require('@ssojet/ssokit-css/tailwind/preset.cjs')],
 };
 ```
 
@@ -281,11 +286,10 @@ pnpm dev
 
 - [x] Core types and schemas
 - [x] Webhook verification + SCIM client
-- [x] Next.js route handlers
-- [x] React hooks and providers
-- [x] Theming system
-- [ ] TeamManager widget (In Progress)
-- [ ] Example application
+- [x] SSOJet API client
+- [x] Theming system with CSS presets
+- [x] TeamManager widget with full functionality
+- [x] Example Next.js application
 - [ ] E2E tests
 - [ ] Storybook components
 - [ ] SDK documentation site
@@ -307,7 +311,7 @@ MIT © [SSOJet Team](https://ssojet.com)
 ## 💬 Support
 
 - [Documentation](https://docs.ssojet.com)
-- [GitHub Issues](https://github.com/ssojet/ssojet-authkit/issues)
+- [GitHub Issues](https://github.com/ssojet/ssojet-ssokit/issues)
 - [Discord Community](https://discord.gg/ssojet)
 - [Email Support](mailto:support@ssojet.com)
 

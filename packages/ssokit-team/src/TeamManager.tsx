@@ -156,7 +156,7 @@ export function TeamManager({
         client.listRoles(),
       ]);
       
-      console.log('API Responses:', { membersRes, invitationsRes, rolesRes });
+    //  console.log('API Responses:', { membersRes, invitationsRes, rolesRes });
       
       // Handle users API response format: { users: [...] }
       const rawUsers = (membersRes as any)?.users || (membersRes as any)?.data || membersRes || [];

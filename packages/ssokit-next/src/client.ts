@@ -215,7 +215,7 @@ export class SSOJetClient {
 
   // Members
   async listMembers(orgId: string, params?: Record<string, string>) {
-    console.log("=== ssojet");
+  //  console.log("=== ssojet");
     const query = params ? `?${new URLSearchParams(params).toString()}` : '';
     return this.request(`/api/v1/auth/tenants/${orgId}/users${query}`);
   }
@@ -235,7 +235,7 @@ export class SSOJetClient {
   }
 
   async removeMember(tenantId: string, userId: string) {
-    console.log('==== Removing member from SSOJetClient', { tenantId, userId });
+   // console.log('==== Removing member from SSOJetClient', { tenantId, userId });
     return this.request(`/api/v1/auth/tenants/${tenantId}/users`, {
       method: 'DELETE',
       headers: {
@@ -293,13 +293,13 @@ export class SSOJetClient {
 
   // Roles
   async listRoles() {
-    console.log('==== Listing roles from SSOJetClient');
+    //console.log('==== Listing roles from SSOJetClient');
     return this.request(`/api/v1/auth/roles`);
   }
 
   // Update member roles
   async updateMemberRoles(tenantId: string, userId: string, roleIds: string[]) {
-    console.log('==== Updating member roles from SSOJetClient', { tenantId, userId, roleIds });
+    //console.log('==== Updating member roles from SSOJetClient', { tenantId, userId, roleIds });
     return this.request(`/api/v1/auth/tenants/${tenantId}/users/${userId}/roles`, {
       method: 'POST',
       headers: {

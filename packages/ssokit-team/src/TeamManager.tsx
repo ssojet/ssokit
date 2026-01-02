@@ -120,6 +120,10 @@ export function TeamManager({
 
   // Check if current user has management permissions
   const canManageTeam = useMemo(() => {
+
+      console.log("== Checking management permissions ==");
+    console.log("Current User Role:", currentUserRole);
+    console.log("Allowed Manager Roles:", allowedManagerRoles);
     if (!currentUserRole) return false;
     return allowedManagerRoles.includes(currentUserRole);
   }, [currentUserRole, allowedManagerRoles]);

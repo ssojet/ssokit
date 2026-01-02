@@ -121,9 +121,7 @@ export function TeamManager({
   // Check if current user has management permissions
   const canManageTeam = useMemo(() => {
 
-      console.log("== Checking management permissions ==");
-    console.log("Current User Role:", currentUserRole);
-    console.log("Allowed Manager Roles:", allowedManagerRoles);
+  
     if (!currentUserRole) return false;
     return allowedManagerRoles.includes(currentUserRole);
   }, [currentUserRole, allowedManagerRoles]);
@@ -160,7 +158,7 @@ export function TeamManager({
         client.listRoles(),
       ]);
       
-      console.log('API Responses:', { membersRes, invitationsRes, rolesRes });
+    //  console.log('API Responses:', { membersRes, invitationsRes, rolesRes });
       
       // Handle users API response format: { users: [...] }
       const rawUsers = (membersRes as any)?.users || (membersRes as any)?.data || membersRes || [];
@@ -201,11 +199,7 @@ export function TeamManager({
         });
       }
       
-      console.log('Processed data:', { 
-        activeMembers: allMembers, 
-        pendingInvites, 
-        roles 
-      });
+   
       
       setMembers(allMembers);
       setInvites(pendingInvites);

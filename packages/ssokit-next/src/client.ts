@@ -215,7 +215,6 @@ export class SSOJetClient {
 
   // Members
   async listMembers(orgId: string, params?: Record<string, string>) {
-  //  console.log("=== ssojet");
     const query = params ? `?${new URLSearchParams(params).toString()}` : '';
     return this.request(`/api/v1/auth/tenants/${orgId}/users${query}`);
   }
@@ -293,7 +292,6 @@ export class SSOJetClient {
 
   // Roles
   async listRoles() {
-    //console.log('==== Listing roles from SSOJetClient');
     return this.request(`/api/v1/auth/roles`);
   }
 

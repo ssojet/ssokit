@@ -86,16 +86,16 @@ export function TeamManager({
     if (managerRoles && managerRoles.length > 0) {
       return managerRoles;
     }
-    
+
     // Check environment variable
-    const envRoles = typeof window !== 'undefined' 
+    const envRoles = typeof window !== 'undefined'
       ? process.env.NEXT_PUBLIC_SSOKIT_TEAM_MANAGER_ROLES
       : process.env.SSOKIT_TEAM_MANAGER_ROLES;
-    
+
     if (envRoles) {
       return envRoles.split(',').map(role => role.trim());
     }
-    
+
     // Default to Owner only
     return ['Owner'];
   }, [managerRoles]);
@@ -113,6 +113,9 @@ export function TeamManager({
 
   // Get current user's role in this organization
   const currentUserRole = useMemo(() => {
+    console.log('currentUserId', currentUserId);
+    console.log('members', members);
+    console.log('allowedManagerRoles', allowedManagerRoles);
     if (!currentUserId) return null;
     const currentMember = members.find(m => m.userId === currentUserId || m.id === currentUserId);
     return currentMember?.role || null;
@@ -121,7 +124,7 @@ export function TeamManager({
   // Check if current user has management permissions
   const canManageTeam = useMemo(() => {
 
-  
+
     if (!currentUserRole) return false;
     return allowedManagerRoles.includes(currentUserRole);
   }, [currentUserRole, allowedManagerRoles]);
@@ -130,7 +133,7 @@ export function TeamManager({
   const transformUserToMember = useCallback((user: any, targetTenantId: string): UIMember => {
     const targetTenant = user.tenants?.find((t: any) => t.tenant_id === targetTenantId);
     const primaryRole = targetTenant?.roles?.[0];
-    
+
     return {
       id: user.id,
       userId: user.id,
@@ -151,36 +154,36 @@ export function TeamManager({
     try {
       setLoading(true);
       setError(null);
-      
+
       const [membersRes, invitationsRes, rolesRes] = await Promise.all([
         client.listMembers(organizationId),
         client.listInvites(organizationId, 'pending'),
         client.listRoles(),
       ]);
-      
-    //  console.log('API Responses:', { membersRes, invitationsRes, rolesRes });
-      
+
+      //  console.log('API Responses:', { membersRes, invitationsRes, rolesRes });
+
       // Handle users API response format: { users: [...] }
       const rawUsers = (membersRes as any)?.users || (membersRes as any)?.data || membersRes || [];
       // Handle roles API response format: { roles: [...] }
       const roles = (rolesRes as any)?.roles || (rolesRes as any)?.data || rolesRes || [];
       // Handle invitations API response format: { invitation: [...] }
       const rawInvitations = (invitationsRes as any)?.invitation || [];
-      
+
       // Transform users to active members only
       const allMembers: UIMember[] = [];
-      
+
       if (Array.isArray(rawUsers)) {
         rawUsers.forEach((user: any) => {
           const member = transformUserToMember(user, organizationId);
-          
+
           // Only include active members
           if (member.status === 'active' || !member.status) {
             allMembers.push(member);
           }
         });
       }
-      
+
       // Transform invitations to pending invites
       const pendingInvites: UIMember[] = [];
       if (Array.isArray(rawInvitations)) {
@@ -198,9 +201,9 @@ export function TeamManager({
           pendingInvites.push(invite);
         });
       }
-      
-   
-      
+
+
+
       setMembers(allMembers);
       setInvites(pendingInvites);
       setRoles(Array.isArray(roles) ? roles : []);
@@ -249,7 +252,7 @@ export function TeamManager({
     [client, organizationId, fetchData, onMemberRemoved]
   );
 
-    const handleInviteMember = useCallback(
+  const handleInviteMember = useCallback(
     async (email: string, roleName: string) => {
       try {
         // Find the role ID by role name
@@ -391,7 +394,7 @@ export function TeamManager({
 
       {/* Status Message */}
       {statusMessage && (
-        <div 
+        <div
           className={`sk-status-message sk-status-message--${statusMessage.type}`}
           role="alert"
           aria-live="polite"
